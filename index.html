@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- WEB PAGE HEAD START -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#00ff44">
+    <title>Flight Tool: fly anywhere in 3D in AltspaceVR | FireR.at</title>
+    <meta name="description" content="A pen that flies you anywhere in 3D in AltspaceVR (altvr.app) worlds: hold the trigger and move your hand. Works at any level, in VR and on PC. Drop-in snippet.">
+    <meta name="keywords" content="AltspaceVR flight, VR flying tool, fly in AltspaceVR, altvr.app snippet, Creator SDK snippet, FireRat">
+    <meta name="author" content="FireRat">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="FireR.at">
+    <meta property="og:title" content="Flight Tool: fly anywhere in 3D in AltspaceVR | FireR.at">
+    <meta property="og:description" content="A pen that flies you anywhere in 3D: hold the trigger and move your hand. Works at any level, in VR and on PC.">
+    <meta property="og:url" content="https://flight-tool.firer.at/">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Flight Tool: fly anywhere in 3D in AltspaceVR | FireR.at">
+    <meta name="twitter:description" content="A pen that flies you anywhere in 3D: hold the trigger and move your hand.">
+    <link rel="canonical" href="https://flight-tool.firer.at/">
+    <link rel="icon" href="https://firer.at/files/favicon.ico" type="image/x-icon">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "name": "Flight Tool for AltspaceVR",
+          "url": "https://flight-tool.firer.at/",
+          "description": "A pen that flies you anywhere in 3D in AltspaceVR (altvr.app) worlds. Works at any level, in VR and on PC.",
+          "applicationCategory": "Utility",
+          "operatingSystem": "AltspaceVR",
+          "author": {
+            "@type": "Person",
+            "name": "FireRat",
+            "url": "https://firer.at/"
+          },
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "FireR.at", "item": "https://firer.at/" },
+            { "@type": "ListItem", "position": 2, "name": "Altspace & Banter Games", "item": "https://firer.at/games.html" },
+            { "@type": "ListItem", "position": 3, "name": "Flight Tool", "item": "https://flight-tool.firer.at/" }
+          ]
+        }
+      ]
+    }
+    </script>
+    <script>
+      // In Altspace this page is the space itself, so the web page part is hidden.
+      (function () {
+        var hide = function () { document.documentElement.classList.add('in-space'); };
+        if (window.isBanter || window.BS) hide();
+        window.addEventListener('bs-loaded', hide);
+      })();
+    </script>
+    <link rel="stylesheet" href="https://firer.at/pages/nstyle.css">
+    <script src="https://firer.at/scripts/RandomBG.js"></script>
+    <style>
+      .in-space .fire-page, .in-space body::before, .in-space body::after { display: none !important; }
+      .fire-page #guide ul, .fire-page .info-block ul, .fire-page .info-block ol { color: var(--text-secondary); margin: 0 0 1.25rem 1.4rem; }
+      .fire-page li { margin-bottom: 0.4rem; }
+      .fire-page .info-block { margin-bottom: 3rem; }
+      .fire-page footer { text-align: center; }
+      .fire-page .table-wrap { overflow-x: auto; margin-bottom: 1.25rem; }
+      .fire-page table { border-collapse: collapse; width: 100%; color: var(--text-secondary); }
+      .fire-page th, .fire-page td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); vertical-align: top; }
+      .fire-page th { color: var(--text-primary, #fff); }
+      .fire-page td code { white-space: nowrap; }
+    </style>
+    <!-- WEB PAGE HEAD END -->
+</head>
+
+<body>
+<!-- WEB PAGE START: shown in a normal browser, hidden in Altspace -->
+<div class="fire-page">
+  <div class="ambient-glow-2"></div>
+  <div class="container">
+    <header>
+      <span class="eyebrow">Altspace tool</span>
+      <h1><span class="text-gradient">Flight Tool</span></h1>
+      <p>A pen that flies you anywhere in 3D. Grab it, hold the trigger and move your hand: you fly the way you pull, faster the further you pull. Made for <strong>SideQuest / AltspaceVR</strong> worlds.</p>
+      <p>It works at <strong>any level</strong> (it doesn't use bird flight), in <strong>VR</strong> and on <strong>PC</strong>. Open <a href="https://flight-tool.firer.at">flight-tool.firer.at</a> as a space in Altspace to try it.</p>
+    </header>
+
+    <nav>
+      <a href="https://firer.at/games.html" class="buttonG buttonss buttonActive">&larr; All games</a>
+      <a href="https://firer.at/" class="buttonss buttonMain">FireR.at</a>
+      <a href="https://github.com/FireRat666/flight-tool" class="buttonW buttonss" target="_blank">GitHub</a>
+      <a href="https://ko-fi.com/FireRat666" class="buttonGY buttonss" target="_blank">Ko-fi</a>
+    </nav>
+
+    <main>
+      <section class="info-block">
+        <h2>How to fly</h2>
+        <h3>In VR</h3>
+        <ol>
+          <li><strong>Grab the pen</strong> with grip.</li>
+          <li><strong>Hold the trigger</strong> and move your hand. A line runs from where you pressed the trigger to the pen's tip, and you fly along it: up, down, left, right, forward, back, or any mix. The further from the start, the faster.</li>
+          <li><strong>Hover</strong> by holding the pen still at the start point. Bring it back towards the start to slow down.</li>
+          <li><strong>Let go of the trigger</strong> and you fall as normal, keeping the speed you had.</li>
+          <li><strong>Turning (optional):</strong> press <kbd>A</kbd> or <kbd>X</kbd> while holding the pen to switch twist-to-turn on (an orange band appears on the pen) or off. While it's on and you're flying, twist the pen clockwise to turn right and anticlockwise to turn left, a step at a time.</li>
+        </ol>
+        <h3>On PC</h3>
+        <ol>
+          <li><strong>Click the pen</strong> to pick it up. While you hold it you hover.</li>
+          <li><strong>Arrow keys</strong> fly you where you're looking. <kbd>Space</kbd> flies up and <kbd>Tab</kbd> flies down.</li>
+          <li><strong>Hold <kbd>3</kbd></strong> to fly by the pen's position like in VR: move the mouse, and scroll to push the pen away or pull it in.</li>
+          <li><strong>Drop the pen</strong> to land.</li>
+        </ol>
+        <p>A pen waits where the world's builder put it, with a <strong>Grab the pen to fly</strong> label over it. The first time you pick one up, a message shows the controls for VR or PC.</p>
+        <p>Each player gets a pen of their own: when you pick one up, a new one appears in its place for the next person. Your pen stays where you let go of it, and goes away 30 seconds later. A world can instead make it one <strong>shared</strong> pen that everyone sees (<code>sync</code>), which goes back to its spot 30 seconds after it's dropped.</p>
+      </section>
+
+      <section id="guide">
+        <h2>1. Pick how you build your world</h2>
+        <p>Flight Tool is an Altspace <strong>snippet</strong>: a ready-made piece you drop into your world. Its name (the "slug") is always:</p>
+        <p><button type="button" class="copy-chip" data-copy="fly">fly <span class="copy-label">Copy</span></button></p>
+        <p>Type it exactly like that (<strong>all lowercase</strong>). Pick the way you build your world and follow that section below.</p>
+
+        <div class="choice-grid">
+          <div class="choice-card">
+            <div class="tech-badges"><span class="badge vr">Recommended</span></div>
+            <h3>I build my world in Unity</h3>
+            <p>You use the Altspace <strong>Creator SDK</strong> in Unity. You get the settings in the Inspector and can drag the pen's spot in the Scene view.</p>
+            <a href="#unity" class="buttonss btn-gradient">Go to the Unity steps</a>
+          </div>
+          <div class="choice-card">
+            <div class="tech-badges"><span class="badge json">No Unity needed</span></div>
+            <h3>I edit my world on the website</h3>
+            <p>You edit your world on <strong>altvr.app</strong> in your browser. You copy the snippet from the Snippets section (or below) and paste it into your world's HTML.</p>
+            <a href="#website" class="buttonss buttonG">Go to the website steps</a>
+          </div>
+        </div>
+
+        <div id="unity" class="guide-sub">
+          <h2>2a. Add it in Unity</h2>
+          <p>You need a Unity project with the Altspace <strong>Creator SDK</strong> already set up, and your world's scene open.</p>
+          <ol class="steps">
+            <li><strong>Make an empty object.</strong> In the top menu choose <span class="menu">GameObject &rsaquo; Create Empty</span>. Rename it to <code>Flight Tool</code> so you can find it later (the object's name doesn't matter, only the slug does).</li>
+            <li><strong>Put it at the middle of the world.</strong> With the new object selected, look at <strong>Transform</strong> in the Inspector and set <strong>Position</strong> to <code>0 0 0</code> and <strong>Rotation</strong> to <code>0 0 0</code>.
+              <span class="sub">Why: you don't move the pen by moving this object. You move it with the snippet's own <code>position</code> setting (step 6). If the object (or anything it's inside) isn't at <code>0 0 0</code>, the SDK's gizmo won't line up with where the pen really appears.</span></li>
+            <li><strong>Add the Snippet component.</strong> Click <span class="menu">Add Component</span>, type <code>Snippet</code> in the search box, and pick <span class="menu">BS &rsaquo; Snippet</span>.</li>
+            <li><strong>Type the slug and press Enter.</strong> In the Snippet's <strong>Slug</strong> box type <button type="button" class="copy-chip" data-copy="fly">fly <span class="copy-label">Copy</span></button> and press <kbd>Enter</kbd> (the box only takes it after Enter or clicking somewhere else).
+              <span class="sub">It downloads the snippet and adds it to your world's <code>Assets/WebRoot/index.html</code> for you. After a moment the Inspector shows the title <strong>Flight Tool</strong> and a list of settings. If nothing happens, click <strong>Refresh from server</strong>.</span></li>
+            <li><strong>Save the scene.</strong> Press <kbd>Ctrl</kbd> + <kbd>S</kbd> (Windows / Linux) or <kbd>Cmd</kbd> + <kbd>S</kbd> (Mac).
+              <span class="sub">Do this every time you add or remove a snippet. Closing Unity without saving is the main way extra copies of the snippet end up in <code>index.html</code>.</span></li>
+            <li><strong>Place and configure it.</strong> Drag the gizmo handle in the Scene view to choose where the pen waits, and change the other settings in the Inspector. They're all listed under <a href="#settings">Settings</a>.</li>
+            <li><strong>Upload your world</strong> the same way you always do, then join it in Altspace and pick up the pen.</li>
+          </ol>
+          <div class="callout info">
+            <p><strong>More pens:</strong> add Flight Tool once, then give it more spots. Click <strong>Open index.html</strong> in the Snippet component and add <code>tool-2-position="5 1 0"</code>, <code>tool-3-position="0 20 4"</code> and so on to the snippet. Each one is another pen, with the same settings. Use as many as you like.</p>
+          </div>
+        </div>
+
+        <div id="website" class="guide-sub">
+          <h2>2b. Add it on the website</h2>
+          <ol class="steps">
+            <li><strong>Open your world for editing</strong> on <a href="https://altvr.app" target="_blank" rel="noopener">altvr.app</a> and go to the <strong>Snippets</strong> section.</li>
+            <li><strong>Find Flight Tool.</strong> Set the list to show <strong>All</strong> snippets, then search for <code>Flight Tool</code> (or scroll to it) and open it.</li>
+            <li><strong>Copy it.</strong> Click <strong>Copy &amp; open index.html</strong>. This copies the snippet's code and opens your world's HTML (or copy the full snippet code below).</li>
+            <li><strong>Paste it in the right place.</strong> If your HTML has these two lines, paste <em>between</em> them:
+<pre><code>&lt;!-- snippet section --&gt;
+   paste here
+&lt;!-- end snippet section --&gt;</code></pre>
+              <span class="sub">If it doesn't have them, paste it just before <code>&lt;/body&gt;</code>.</span></li>
+            <li><strong>Change the settings</strong> by editing the values in quotes in the pasted code, for example <code>position="0 1 2"</code>. For more pens, add <code>tool-2-position="5 1 0"</code>, <code>tool-3-position="0 20 4"</code> and so on, as many as you like.</li>
+            <li><strong>Save</strong>, then join your world and pick up the pen.</li>
+          </ol>
+          <div class="callout warn">
+            <p><strong>Keep the code tidy.</strong> Every value needs quotes around it (<code>max-speed="12"</code>, not <code>max-speed=12</code>), and a <code>&amp;</code> in any link must be written as <code>&amp;amp;</code>. Unity reads this part strictly, and one mistake can break the whole snippet section.</p>
+          </div>
+
+          <h3>The full snippet code</h3>
+          <p>This is everything the snippet adds, with every setting at its default. Click the code to copy it.</p>
+          <div class="code-header">Full snippet code</div>
+          <pre><code>&lt;!-- snippet section --&gt;
+&lt;bs-snippet name="fly" title="Flight Tool" single="true"
+  description="A pen that flies you anywhere in 3D: hold the trigger and move your hand. Works at any level, in VR and on PC."
+  script="https://flight-tool.firer.at/snippet.js"
+  position="0 1 1"
+  sync="false"
+  max-speed="10"
+  dead-zone="0.02"
+  full-range="0.3"
+  response="6"
+  key-speed="5"
+  turning="false"
+  turn-step="30"
+  turn-twist="25"
+  turn-repeat="0.35"
+  eye-height="1.6"
+  return-after="30"
+  help="true"
+  label="true"
+  bundle-base=""&gt;
+  &lt;bs-gizmo type="position" attribute="position"/&gt;
+  &lt;bs-gizmo type="box" attribute="position" size="0.04 0.18 0.04"/&gt;
+&lt;/bs-snippet&gt;
+&lt;!-- end snippet section --&gt;</code></pre>
+        </div>
+      </section>
+
+      <section id="settings" class="info-block">
+        <h2>Settings</h2>
+        <p>All optional. An empty or missing setting uses the default.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Setting</th><th>Default</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td><code>position</code></td><td><code>0 1 1</code></td><td>Where the pen waits (a Unity world position), and where it goes back to.</td></tr>
+              <tr><td><code>tool-2-position</code>, <code>tool-3-position</code>, ...</td><td>(none)</td><td>More pens, each one <code>x y z</code>. Add as many as you like; they all use the settings below.</td></tr>
+              <tr><td><code>sync</code></td><td><code>false</code></td><td><code>true</code> makes each spot one shared pen that everyone sees in the holder's hand. <code>false</code> gives every player a pen of their own (others don't see it).</td></tr>
+              <tr><td><code>max-speed</code></td><td><code>10</code></td><td>Top speed in metres per second.</td></tr>
+              <tr><td><code>dead-zone</code></td><td><code>0.02</code></td><td>Metres round the start point that don't move you, so a shaky hand still hovers.</td></tr>
+              <tr><td><code>full-range</code></td><td><code>0.3</code></td><td>How far past the dead zone (in metres) you move the pen for top speed. Speed grows with the square of the distance, so small movements give fine control.</td></tr>
+              <tr><td><code>response</code></td><td><code>6</code></td><td>How quickly your speed follows the pen. Higher feels snappier, lower floatier.</td></tr>
+              <tr><td><code>key-speed</code></td><td><code>5</code></td><td>Speed in metres per second for the PC keys (arrow keys, Space, Tab).</td></tr>
+              <tr><td><code>turning</code></td><td><code>false</code></td><td><code>true</code> starts with twist-to-turn on. Players can still toggle it with <kbd>A</kbd> / <kbd>X</kbd>.</td></tr>
+              <tr><td><code>turn-step</code></td><td><code>30</code></td><td>Degrees per turn step.</td></tr>
+              <tr><td><code>turn-twist</code></td><td><code>25</code></td><td>How far (in degrees) the pen has to be twisted before you turn.</td></tr>
+              <tr><td><code>turn-repeat</code></td><td><code>0.35</code></td><td>Seconds between turn steps while the pen stays twisted.</td></tr>
+              <tr><td><code>eye-height</code></td><td><code>1.6</code></td><td>Metres from eyes to feet. A turn step moves you by your feet, so this keeps you at the same height.</td></tr>
+              <tr><td><code>return-after</code></td><td><code>30</code></td><td>Seconds after it's dropped before the pen goes home: a shared pen moves back to <code>position</code>, a pen of your own goes away (a new one already waits there). <code>0</code> leaves it where it was dropped.</td></tr>
+              <tr><td><code>help</code></td><td><code>true</code></td><td><code>false</code> skips the message with the controls the first time someone picks up a pen.</td></tr>
+              <tr><td><code>label</code></td><td><code>true</code></td><td><code>false</code> hides the <strong>Grab the pen to fly</strong> label over the pen's spot.</td></tr>
+              <tr><td><code>bundle-base</code></td><td>(empty)</td><td>A folder URL to load the pen's bundles from instead of this site.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="info-block">
+        <h2>Good to know</h2>
+        <ul>
+          <li>Only the person flying sees the line and the start point. With <code>sync="true"</code> everyone sees the pen too; otherwise each player only sees their own.</li>
+          <li>A pen that's put down stays exactly where you let go: it doesn't fall or get knocked away.</li>
+          <li>The pen pushes you rather than teleporting you, so walls and floors still stop you.</li>
+          <li>Twist-to-turn works by small teleports. If your play area is off-centre, each step can shift you slightly.</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <p>A pen that flies you anywhere in 3D. Open <a href="https://flight-tool.firer.at">flight-tool.firer.at</a> as a space in Altspace to try it.</p>
+      <p>&copy; <span class="fire-year"></span> <a href="https://firer.at/">FireR.at</a></p>
+    </footer>
+  </div>
+  <script>
+    document.querySelectorAll('.fire-year').forEach(el => { el.textContent = new Date().getFullYear(); });
+    document.querySelectorAll('.fire-page [data-copy]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const label = btn.querySelector('.copy-label');
+        try {
+          await navigator.clipboard.writeText(btn.dataset.copy);
+          if (label) { const old = label.textContent; label.textContent = 'Copied'; setTimeout(() => { label.textContent = old; }, 1500); }
+        } catch (e) {
+          if (label) { const old = label.textContent; label.textContent = 'Select it'; setTimeout(() => { label.textContent = old; }, 1500); }
+        }
+      });
+    });
+    document.querySelectorAll('.fire-page pre').forEach(pre => {
+      pre.addEventListener('click', async () => {
+        const header = pre.previousElementSibling;
+        try {
+          await navigator.clipboard.writeText(pre.innerText);
+          if (header && header.classList.contains('code-header')) { const t = header.textContent; header.textContent = 'Copied!'; setTimeout(() => { header.textContent = t; }, 2000); }
+        } catch (e) { console.error('Copy failed', e); }
+      });
+    });
+  </script>
+</div>
+<!-- WEB PAGE END -->
+    <a-scene></a-scene>
+    <script>
+        // A big sphere round the space with a sky picture on its inside.
+        async function createSky() {
+            const sky = await new BS.GameObject({ name: "BanterSky" }).Async();
+            await sky.AddComponent(new BS.BanterSphere({ radius: 300 }));
+            await sky.AddComponent(new BS.BanterInvertedMesh()); // Faces inwards, so it shows from inside
+            await sky.AddComponent(new BS.BanterMaterial({
+                shaderName: "Unlit/Diffuse",
+                texture: "https://drop.firer.at/Assets/skybox-4k-zc.jpg",
+                color: new BS.Vector4(1, 1, 1, 1),
+                side: BS.MaterialSide.Front
+            }));
+            await sky.AddComponent(new BS.Transform());
+        }
+
+        // A big floor, so there's room to fly about and somewhere to land.
+        async function createFloor() {
+            createSky();
+            const floor = await new BS.GameObject("BanterFloor").Async();
+            const width = 60; const height = 0.1; const depth = 60;
+
+            const geoArgs = [BS.GeometryType.BoxGeometry, null, width, height, depth, 1, 1, 1, 0.5, 24, 0, 6.28, 0, 6.28, 8, false, 0.5, 0.5, 0, 1, 24, 8, 0.4, 16, 6.28, 2, 3, 5, 5, 0, ""];
+            await floor.AddComponent(new BS.BanterGeometry(...geoArgs));
+
+            const texUrl = "https://cdn.aframe.io/a-painter/images/floor.jpg";
+            await floor.AddComponent(new BS.BanterMaterial("Unlit/Texture", texUrl, new BS.Vector4(1, 1, 1, 1), BS.MaterialSide.Front, true));
+            await floor.AddComponent(new BS.BoxCollider(false, new BS.Vector3(0, 0, 0), new BS.Vector3(width, height, depth)));
+
+            let transform = floor.GetComponent(BS.ComponentType.Transform);
+            if (!transform) transform = await floor.AddComponent(new BS.Transform());
+            transform.localPosition = new BS.Vector3(0, -0.05, 0); // Flush with 0
+        }
+
+        window.addEventListener("bs-loaded", async () => {
+            createFloor();
+        });
+    </script>
+    <!-- snippet section -->
+    <bs-snippet name="fly" title="Flight Tool" single="true"
+      description="A pen that flies you anywhere in 3D: hold the trigger and move your hand. Works at any level, in VR and on PC."
+      script="https://flight-tool.firer.at/snippet.js"
+      position="0 1 1"
+      tool-2-position="3 1 1"
+      sync="false"
+      max-speed="10"
+      dead-zone="0.02"
+      full-range="0.3"
+      response="6"
+      key-speed="5"
+      turning="false"
+      turn-step="30"
+      turn-twist="25"
+      turn-repeat="0.35"
+      eye-height="1.6"
+      return-after="30"
+      help="true"
+      label="true"
+      bundle-base="">
+      <bs-gizmo type="position" attribute="position"/>
+      <bs-gizmo type="box" attribute="position" size="0.04 0.18 0.04"/>
+    </bs-snippet>
+    <!-- end snippet section -->
+</body>
+
+</html>

@@ -1,0 +1,174 @@
+// Flight Tool as a SideQuest/Altspace Creator SDK snippet.
+//
+//   <bs-snippet name="fly" title="Flight Tool" single="true"
+//     script="https://flight-tool.firer.at/snippet.js" position="0 1 1" tool-2-position="5 1 1"></bs-snippet>
+//
+// A pen that flies you around: grab it, hold the trigger and move your hand away from where you pressed it.
+// It works at any level (it doesn't use bird flight).
+//
+// JavaScript can't fly a player smoothly, but Visual Scripting can. So this script loads a small kit (an asset
+// bundle holding the pen, with a Visual Scripting graph that does the flying) for each pen spot: `position`, and
+// tool-2-position, tool-3-position and so on, as many as you add. When a pen spawns its graph calls
+// window.penFlightReady(key), and this script answers with the settings (the same for every spot).
+//
+// By default everyone has pens of their own: picking up the one waiting at `position` leaves a new one there, and a
+// dropped pen stays where it was let go and goes away `return-after` seconds later. With sync="true" each spot is
+// one shared pen that everyone sees, and it goes back to `position` `return-after` seconds after it's dropped.
+//
+// Settings (attributes on the element, all optional):
+//   position      Where the pen waits, "x y z" (Unity world position).                Default "0 1 1"
+//   tool-N-position  More pens, N = 2, 3, 4...: each one "x y z", any number of them.  Default none
+//   sync          "true": one shared pen everyone sees, instead of a pen each.         Default false
+//   max-speed     Top speed in m/s, with the pen full-range past the dead zone.       Default 10
+//   dead-zone     Metres round the start point that don't move you.                    Default 0.02
+//   full-range    Metres past the dead zone for top speed (speed grows with the
+//                 square, for fine control near the start point).                      Default 0.3
+//   response      How quickly your speed follows the pen, per second.                  Default 6
+//   key-speed     Speed in m/s for the PC keys (arrow keys, Space, Tab).               Default 5
+//   turning       "true" to start with twist-to-turn on (the A / X button toggles it). Default false
+//   turn-step     Degrees per turn step.                                               Default 30
+//   turn-twist    Degrees of twist before a turn step.                                 Default 25
+//   turn-repeat   Seconds between turn steps while the pen stays twisted.              Default 0.35
+//   eye-height    Metres from eyes to feet, used when turning.                         Default 1.6
+//   return-after  Seconds after it's dropped before the pen goes home (0 = never).     Default 30
+//   help          "false" to skip the toast with the controls on the first grab.      Default true
+//   label         "false" to hide the "Grab the pen to fly" label.                     Default true
+//   bundle-base   Folder URL of the kit bundles.                     Default bundles/ next to this file
+(() => {
+  const SNIPPET_NAME = 'fly';
+  const BUNDLE_FILE = 'penflight';
+  // The app caches kit bundles by URL, so bump this whenever the bundles are rebuilt.
+  const BUNDLE_VERSION = '2';
+  // Return IDs the kit's graph listens for.
+  const SET_ID = 'pen-flight-set';
+  const LOG = 'Flight Tool (snippet)';
+
+  // Attribute -> the graph's Object variable, and its default.
+  const NUMBERS = [
+    ['max-speed', 'MaxSpeed', 10],
+    ['dead-zone', 'DeadZone', 0.02],
+    ['full-range', 'FullRange', 0.3],
+    ['response', 'Response', 6],
+    ['key-speed', 'KeySpeed', 5],
+    ['turn-step', 'TurnStep', 30],
+    ['turn-twist', 'TurnTwist', 25],
+    ['turn-repeat', 'TurnRepeat', 0.35],
+    ['eye-height', 'EyeHeight', 1.6],
+    ['return-after', 'ReturnAfter', 30],
+  ];
+  // Attribute -> variable, default: true / false, sent as 1 / 0.
+  const SWITCHES = [
+    ['turning', 'Turning', false],
+    ['help', 'Help', true],
+    ['label', 'ShowLabel', true],
+    // Last: once it's on, the pen is the shared one.
+    ['sync', 'Sync', false],
+  ];
+
+  const thisScript = document.currentScript;
+  const started = new WeakSet();
+  // Pen key (the name of the object the kit is spawned under) -> that placement's settings.
+  const placements = new Map();
+  let count = 0;
+
+  const bundleUrls = (el) => {
+    const scriptUrl = el.getAttribute('script') || (thisScript && thisScript.src) || location.href;
+    const custom = (el.getAttribute('bundle-base') || '').trim();
+    const base = new URL(custom || 'bundles/', new URL(scriptUrl, location.href));
+    if (!base.pathname.endsWith('/')) base.pathname += '/';
+    const url = (platform) => new URL(`${platform}/${BUNDLE_FILE}?v=${BUNDLE_VERSION}`, base).href;
+    return {
+      windowsUrl: url('windows'),
+      androidUrl: url('android'),
+      linuxUrl: url('linux'),
+      osxUrl: url('osx'),
+      isScene: false,
+    };
+  };
+
+  const readSettings = (el) => {
+    const attr = (name) => (el.getAttribute(name) || '').trim();
+    const vars = {};
+    for (const [name, key, fallback] of NUMBERS) {
+      const n = parseFloat(attr(name));
+      vars[key] = Number.isFinite(n) ? n : fallback;
+    }
+    for (const [name, key, fallback] of SWITCHES) {
+      const v = attr(name).toLowerCase();
+      vars[key] = (v === '' ? fallback : v === 'true') ? 1 : 0;
+    }
+    const position = parsePosition(attr('position')) || [0, 1, 1];
+    return { vars, position };
+  };
+
+  const send = async (key) => {
+    const settings = placements.get(key);
+    if (!settings) return;
+    const scene = BS.Scene.GetInstance();
+    for (const [name, value] of Object.entries(settings.vars)) {
+      await scene.SendToVisualScripting(SET_ID, `${key}|${name}=${value}`);
+    }
+  };
+
+  // Called by a pen's graph when it has spawned (a new pen at home does too), so the settings arrive once it's
+  // listening.
+  window.penFlightReady = (key) => {
+    send(String(key)).catch((e) => console.warn(`${LOG}: sending settings failed`, e));
+    return true;
+  };
+
+  const parsePosition = (text) => {
+    const parts = String(text || '').trim().split(/[\s,]+/).map(parseFloat);
+    return parts.length === 3 && parts.every(Number.isFinite) ? parts : null;
+  };
+
+  // Every pen spot on the element: `position` (pen 1), then tool-2-position, tool-3-position... in number order.
+  // Any number works, gaps too; an empty or broken value is skipped.
+  const penSpots = (el, first) => {
+    const spots = [{ n: 1, position: first }];
+    for (const { name, value } of Array.from(el.attributes)) {
+      const m = /^tool-(\d+)-position$/.exec(name);
+      if (!m || Number(m[1]) < 2) continue;
+      const position = parsePosition(value);
+      if (position) spots.push({ n: Number(m[1]), position });
+      else if (value.trim()) console.warn(`${LOG}: ${name}="${value}" isn't "x y z", so that pen is left out`);
+    }
+    return spots.sort((a, b) => a.n - b.n);
+  };
+
+  const spawnPen = async (el, key, position, synced) => {
+    try {
+      const [x, y, z] = position;
+      const obj = new BS.GameObject({ name: key, localPosition: new BS.Vector3(x, y, z) });
+      await obj.Async();
+      await obj.AddComponent(new BS.AssetBundle(bundleUrls(el)));
+      // "*" = the first prefab in the AssetBundle on this same object.
+      await obj.AddComponent(new BS.KitItem({ path: '*' }));
+      console.log(`${LOG}: loading pen ${key} (bundle v${BUNDLE_VERSION}) at ${position.join(' ')}${synced ? ', synced' : ''}`);
+    } catch (e) {
+      console.error(`${LOG}: failed to start ${key}`, e);
+    }
+  };
+
+  const start = async (el) => {
+    if (started.has(el)) return;
+    started.add(el);
+    // Keys are the same for everyone in the space (the placement's instance and the pen's number), so each synced
+    // pen gets the same network id everywhere.
+    const base = `fly-${(el.getAttribute('instance') || '').trim() || ++count}`;
+    const settings = readSettings(el);
+    for (const { n, position } of penSpots(el, settings.position)) {
+      const key = `${base}-${n}`;
+      placements.set(key, settings);
+      await spawnPen(el, key, position, settings.vars.Sync);
+    }
+  };
+
+  const scan = () => document.querySelectorAll(`bs-snippet[name="${SNIPPET_NAME}"]`).forEach(start);
+
+  window.addEventListener('bs-loaded', () => {
+    scan();
+    // Placements added later, e.g. with document.createElement('bs-snippet').
+    new MutationObserver(scan).observe(document.body, { childList: true, subtree: true });
+  });
+})();
