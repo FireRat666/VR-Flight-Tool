@@ -12,7 +12,7 @@
 // window.penFlightReady(key), and this script answers with the settings (the same for every spot).
 //
 // By default everyone has pens of their own: picking up the one waiting at `position` leaves a new one there, and a
-// dropped pen stays where it was let go and goes away `return-after` seconds later. With sync="true" each spot is
+// pen you let go of comes along with you (`follow`), so it's always to hand. With sync="true" each spot is
 // one shared pen that everyone sees, and it goes back to `position` `return-after` seconds after it's dropped.
 //
 // Settings (attributes on the element, all optional):
@@ -26,11 +26,13 @@
 //   response      How quickly your speed follows the pen, per second.                  Default 6
 //   key-speed     Speed in m/s for the PC keys (arrow keys, Space, Tab).               Default 5
 //   turning       "true" to start with twist-to-turn on (the A / X button toggles it). Default false
-//   turn-step     Degrees per turn step.                                               Default 30
-//   turn-twist    Degrees of twist before a turn step.                                 Default 25
-//   turn-repeat   Seconds between turn steps while the pen stays twisted.              Default 0.35
-//   eye-height    Metres from eyes to feet, used when turning.                         Default 1.6
+//   turn-speed    Degrees per second of smooth turning (the pen hand's stick, or twist). Default 90
+//   turn-twist    Degrees of twist before you start turning (as much again for full speed). Default 25
 //   return-after  Seconds after it's dropped before the pen goes home (0 = never).     Default 30
+//                 A pen of your own that follows you doesn't go away.
+//   follow        "false": a pen you let go of stays put, instead of coming with you. Default true
+//   hover         "true": start with hover on (B / Y toggles it): you hover when you
+//                 let go of the trigger, rather than fall.                             Default false
 //   help          "false" to skip the toast with the controls on the first grab.      Default true
 //   label         "false" to hide the "Grab the pen to fly" label.                     Default true
 //   bundle-base   Folder URL of the kit bundles.                     Default bundles/ next to this file
@@ -38,7 +40,7 @@
   const SNIPPET_NAME = 'fly';
   const BUNDLE_FILE = 'penflight';
   // The app caches kit bundles by URL, so bump this whenever the bundles are rebuilt.
-  const BUNDLE_VERSION = '2';
+  const BUNDLE_VERSION = '3';
   // Return IDs the kit's graph listens for.
   const SET_ID = 'pen-flight-set';
   const LOG = 'Flight Tool (snippet)';
@@ -50,15 +52,15 @@
     ['full-range', 'FullRange', 0.3],
     ['response', 'Response', 6],
     ['key-speed', 'KeySpeed', 5],
-    ['turn-step', 'TurnStep', 30],
+    ['turn-speed', 'TurnSpeed', 90],
     ['turn-twist', 'TurnTwist', 25],
-    ['turn-repeat', 'TurnRepeat', 0.35],
-    ['eye-height', 'EyeHeight', 1.6],
     ['return-after', 'ReturnAfter', 30],
   ];
   // Attribute -> variable, default: true / false, sent as 1 / 0.
   const SWITCHES = [
     ['turning', 'Turning', false],
+    ['follow', 'Follow', true],
+    ['hover', 'Hover', false],
     ['help', 'Help', true],
     ['label', 'ShowLabel', true],
     // Last: once it's on, the pen is the shared one.

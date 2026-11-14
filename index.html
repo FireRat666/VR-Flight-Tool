@@ -108,8 +108,9 @@
           <li><strong>Grab the pen</strong> with grip.</li>
           <li><strong>Hold the trigger</strong> and move your hand. A line runs from where you pressed the trigger to the pen's tip, and you fly along it: up, down, left, right, forward, back, or any mix. The further from the start, the faster.</li>
           <li><strong>Hover</strong> by holding the pen still at the start point. Bring it back towards the start to slow down.</li>
-          <li><strong>Let go of the trigger</strong> and you fall as normal, keeping the speed you had.</li>
-          <li><strong>Turning (optional):</strong> press <kbd>A</kbd> or <kbd>X</kbd> while holding the pen to switch twist-to-turn on (an orange band appears on the pen) or off. While it's on and you're flying, twist the pen clockwise to turn right and anticlockwise to turn left, a step at a time.</li>
+          <li><strong>Let go of the trigger</strong> and you fall as normal, keeping the speed you had. Press <kbd>B</kbd> or <kbd>Y</kbd> to switch <strong>hover</strong> on, and you stay where you are instead.</li>
+          <li><strong>Turn</strong> smoothly with the stick of the hand holding the pen. The start point turns with you.</li>
+          <li><strong>Twist-to-turn (optional):</strong> press <kbd>A</kbd> or <kbd>X</kbd> to switch it on (an orange band appears on the pen) or off. While it's on and you're flying, twist the pen clockwise to turn right and anticlockwise to turn left. The further you twist, the faster you turn.</li>
         </ol>
         <h3>On PC</h3>
         <ol>
@@ -119,7 +120,7 @@
           <li><strong>Drop the pen</strong> to land.</li>
         </ol>
         <p>A pen waits where the world's builder put it, with a <strong>Grab the pen to fly</strong> label over it. The first time you pick one up, a message shows the controls for VR or PC.</p>
-        <p>Each player gets a pen of their own: when you pick one up, a new one appears in its place for the next person. Your pen stays where you let go of it, and goes away 30 seconds later. A world can instead make it one <strong>shared</strong> pen that everyone sees (<code>sync</code>), which goes back to its spot 30 seconds after it's dropped.</p>
+        <p>Each player gets a pen of their own: when you pick one up, a new one appears in its place for the next person. When you let go of your pen it comes along with you, so you can grab it again whenever you like. A world can instead make it one <strong>shared</strong> pen that everyone sees (<code>sync</code>), which goes back to its spot 30 seconds after it's dropped.</p>
       </section>
 
       <section id="guide">
@@ -196,11 +197,11 @@
   response="6"
   key-speed="5"
   turning="false"
-  turn-step="30"
+  turn-speed="90"
   turn-twist="25"
-  turn-repeat="0.35"
-  eye-height="1.6"
   return-after="30"
+  follow="true"
+  hover="false"
   help="true"
   label="true"
   bundle-base=""&gt;
@@ -227,11 +228,11 @@
               <tr><td><code>response</code></td><td><code>6</code></td><td>How quickly your speed follows the pen. Higher feels snappier, lower floatier.</td></tr>
               <tr><td><code>key-speed</code></td><td><code>5</code></td><td>Speed in metres per second for the PC keys (arrow keys, Space, Tab).</td></tr>
               <tr><td><code>turning</code></td><td><code>false</code></td><td><code>true</code> starts with twist-to-turn on. Players can still toggle it with <kbd>A</kbd> / <kbd>X</kbd>.</td></tr>
-              <tr><td><code>turn-step</code></td><td><code>30</code></td><td>Degrees per turn step.</td></tr>
-              <tr><td><code>turn-twist</code></td><td><code>25</code></td><td>How far (in degrees) the pen has to be twisted before you turn.</td></tr>
-              <tr><td><code>turn-repeat</code></td><td><code>0.35</code></td><td>Seconds between turn steps while the pen stays twisted.</td></tr>
-              <tr><td><code>eye-height</code></td><td><code>1.6</code></td><td>Metres from eyes to feet. A turn step moves you by your feet, so this keeps you at the same height.</td></tr>
-              <tr><td><code>return-after</code></td><td><code>30</code></td><td>Seconds after it's dropped before the pen goes home: a shared pen moves back to <code>position</code>, a pen of your own goes away (a new one already waits there). <code>0</code> leaves it where it was dropped.</td></tr>
+              <tr><td><code>turn-speed</code></td><td><code>90</code></td><td>Degrees per second of smooth turning, with the stick pushed right over.</td></tr>
+              <tr><td><code>turn-twist</code></td><td><code>25</code></td><td>How far (in degrees) the pen has to be twisted before you start turning.</td></tr>
+              <tr><td><code>return-after</code></td><td><code>30</code></td><td>Seconds after it's dropped before the pen goes home: a shared pen moves back to <code>position</code>; a pen of your own goes away (a new one already waits there) unless it's following you. <code>0</code> leaves it where it was dropped.</td></tr>
+              <tr><td><code>follow</code></td><td><code>true</code></td><td>A pen of your own that you let go of comes along with you, so it's always to hand. <code>false</code> leaves it where you let go.</td></tr>
+              <tr><td><code>hover</code></td><td><code>false</code></td><td><code>true</code> starts with hover on: letting go of the trigger leaves you hovering instead of falling. Players toggle it with <kbd>B</kbd> / <kbd>Y</kbd>.</td></tr>
               <tr><td><code>help</code></td><td><code>true</code></td><td><code>false</code> skips the message with the controls the first time someone picks up a pen.</td></tr>
               <tr><td><code>label</code></td><td><code>true</code></td><td><code>false</code> hides the <strong>Grab the pen to fly</strong> label over the pen's spot.</td></tr>
               <tr><td><code>bundle-base</code></td><td>(empty)</td><td>A folder URL to load the pen's bundles from instead of this site.</td></tr>
@@ -244,9 +245,9 @@
         <h2>Good to know</h2>
         <ul>
           <li>Only the person flying sees the line and the start point. With <code>sync="true"</code> everyone sees the pen too; otherwise each player only sees their own.</li>
-          <li>A pen that's put down stays exactly where you let go: it doesn't fall or get knocked away.</li>
+          <li>A pen that's put down doesn't fall or get knocked away.</li>
           <li>The pen pushes you rather than teleporting you, so walls and floors still stop you.</li>
-          <li>Twist-to-turn works by small teleports. If your play area is off-centre, each step can shift you slightly.</li>
+          <li>Turning works by small teleports, one each frame. While you hold the pen in VR, the stick's usual snap turning is off.</li>
         </ul>
       </section>
     </main>
@@ -332,11 +333,11 @@
       response="6"
       key-speed="5"
       turning="false"
-      turn-step="30"
+      turn-speed="90"
       turn-twist="25"
-      turn-repeat="0.35"
-      eye-height="1.6"
       return-after="30"
+      follow="true"
+      hover="false"
       help="true"
       label="true"
       bundle-base="">
