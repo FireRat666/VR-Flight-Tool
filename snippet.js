@@ -19,12 +19,14 @@
 //   position      Where the pen waits, "x y z" (Unity world position).                Default "0 1 1"
 //   tool-N-position  More pens, N = 2, 3, 4...: each one "x y z", any number of them.  Default none
 //   sync          "true": everyone sees the pen each player takes (still one each).   Default false
+//   sync-limit    Most shared pens in the space at once; past it, pens aren't shared. Default 10
+//   sync-per-player  Most shared pens each player can have; past it, theirs.         Default 2
 //   max-speed     Top speed in m/s, with the pen full-range past the dead zone.       Default 10
 //   dead-zone     Metres round the start point that don't move you.                    Default 0.02
 //   full-range    Metres past the dead zone for top speed (speed grows with the
 //                 square, for fine control near the start point).                      Default 0.3
 //   response      How quickly your speed follows the pen, per second.                  Default 6
-//   key-speed     Speed in m/s for the PC keys (arrow keys, Space, Tab).               Default 5
+//   key-speed     Speed in m/s for the PC keys (W A S D, E, Q).                       Default 5
 //   climb-speed   Speed in m/s up or down with the right stick, flying or hovering.  Default 3
 //   turning       "true" to start with twist-to-turn on (the A / X button toggles it). Default false
 //   turn-speed    Degrees per second of smooth turning while flying (right stick, or twist). Default 45
@@ -42,7 +44,7 @@
   const SNIPPET_NAME = 'fly';
   const BUNDLE_FILE = 'penflight';
   // The app caches kit bundles by URL, so bump this whenever the bundles are rebuilt.
-  const BUNDLE_VERSION = '11';
+  const BUNDLE_VERSION = '12';
   // Return IDs the kit's graph listens for.
   const SET_ID = 'pen-flight-set';
   const OWN_ID = 'pen-flight-own';
@@ -107,7 +109,13 @@
       vars[key] = (v === '' ? fallback : v === 'true') ? 1 : 0;
     }
     const position = parsePosition(attr('position')) || [0, 1, 1];
-    return { vars, position, el };
+    // Limits on shared pens (sync), used here in the page only.
+    const count = (name, fallback) => {
+      const n = parseInt(attr(name), 10);
+      return Number.isFinite(n) && n >= 0 ? n : fallback;
+    };
+    const limits = { total: count('sync-limit', 10), perPlayer: count('sync-per-player', 2) };
+    return { vars, position, el, limits };
   };
 
   const send = async (key) => {
@@ -178,6 +186,15 @@
   window.penFlightTaken = (key) => {
     key = String(key);
     const scene = BS.Scene.GetInstance();
+    // Past a limit the pen isn't shared: it stays your own, as with sync off.
+    const place = placements.get(key);
+    const limits = place ? place.limits : { total: 10, perPlayer: 2 };
+    let total = mine.size;
+    for (const list of shared.values()) total += list.length;
+    if (mine.size >= limits.perPlayer || total >= limits.total) {
+      console.log(`${LOG}: not sharing this pen (${mine.size} of ${limits.perPlayer} yours, ${total} of ${limits.total} in the space)`);
+      return false;
+    }
     const uid = safe(scene.localUser && scene.localUser.uid) || 'me';
     const id = `${key}-${uid}-${Date.now().toString(36)}`;
     mine.set(id, key);
@@ -233,8 +250,38 @@
 
   const scan = () => document.querySelectorAll(`bs-snippet[name="${SNIPPET_NAME}"]`).forEach(start);
 
+  // ---- PC keys: W A S D fly you where you look, E up and Q down, whichever hand holds the pen. The page hears
+  // the keyboard and sends each pen KeyX / KeyY / KeyZ (-1..1) when they change; pens use them only while held.
+  const held = new Set();
+  const sentKeys = { KeyX: 0, KeyY: 0, KeyZ: 0 };
+  const sendKeys = () => {
+    if (placements.size === 0) return;
+    const K = BS.KeyCode;
+    const axis = (plus, minus) => (held.has(plus) ? 1 : 0) - (held.has(minus) ? 1 : 0);
+    const now = { KeyX: axis(K.D, K.A), KeyY: axis(K.W, K.S), KeyZ: axis(K.E, K.Q) };
+    const scene = BS.Scene.GetInstance();
+    for (const [name, value] of Object.entries(now)) {
+      if (sentKeys[name] === value) continue;
+      sentKeys[name] = value;
+      scene.SendToVisualScripting(SET_ID, `*|${name}=${value}`).catch(() => {});
+    }
+  };
+
   window.addEventListener('bs-loaded', () => {
     const scene = BS.Scene.GetInstance();
+    const K = BS.KeyCode;
+    const flyKeys = new Set([K.W, K.A, K.S, K.D, K.Q, K.E]);
+    scene.On('key-press', (e) => {
+      const key = e.detail && e.detail.key;
+      if (!flyKeys.has(key)) return;
+      held.add(key);
+      sendKeys();
+    });
+    scene.On('key-release', (e) => {
+      const key = e.detail && e.detail.key;
+      if (!held.delete(key)) return;
+      sendKeys();
+    });
     scene.On('user-state-changed', (e) => {
       const user = e.detail && e.detail.user;
       if (!user || user.isLocal) return;

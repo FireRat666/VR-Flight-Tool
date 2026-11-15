@@ -20,7 +20,7 @@ To try it, open <https://flight-tool.firer.at> as a space in Altspace.
 **On PC**
 
 1. Click the pen to pick it up. While you hold it you hover.
-2. The arrow keys fly you where you're looking. **Space** flies up and **Tab** flies down.
+2. **W A S D** fly you where you're looking. **E** flies up and **Q** flies down. They work in either hand.
 3. Hold **3** to fly by the pen's position like in VR: move the mouse, and scroll to push the pen away or pull it in.
 4. Drop the pen to land.
 
@@ -39,6 +39,8 @@ In a Creator SDK world, add an empty GameObject at the origin, click **Add Compo
   script="https://flight-tool.firer.at/snippet.js"
   position="0 1 1"
   sync="false"
+  sync-limit="10"
+  sync-per-player="2"
   max-speed="10"
   dead-zone="0.02"
   full-range="0.3"
@@ -74,11 +76,13 @@ All optional. An empty setting uses the default.
 | `position` | `0 1 1` | Where the pen waits (a Unity world position), and where it goes back to. |
 | `tool-2-position`, `tool-3-position`, ... | (none) | More pens, each one `x y z`. Any number, gaps are fine; an empty value is skipped. They all use the same settings. |
 | `sync` | `false` | `true` lets everyone see the pen each player takes (each player still gets one of their own, so one spot serves any number of people). `false`: others don't see your pen. |
+| `sync-limit` | `10` | With `sync`, the most shared pens in the space at once. Pens taken past it aren't shared: they're the taker's own, as with sync off. |
+| `sync-per-player` | `2` | With `sync`, the most shared pens each player can have. Past it, their pens are their own. |
 | `max-speed` | `10` | Top speed in metres per second. |
 | `dead-zone` | `0.02` | Metres round the start point that don't move you, so a shaky hand still hovers. |
 | `full-range` | `0.3` | How far past the dead zone (in metres) you move the pen for top speed. Speed grows with the square of the distance, so small movements give fine control. |
 | `response` | `6` | How quickly your speed follows the pen, per second. Higher feels snappier, lower floatier. |
-| `key-speed` | `5` | Speed in metres per second for the PC keys (arrow keys, Space, Tab). |
+| `key-speed` | `5` | Speed in metres per second for the PC keys (W A S D, E, Q). |
 | `climb-speed` | `3` | Metres per second up or down with the right stick pushed right over, while you fly or hover (VR). |
 | `turning` | `false` | `true` starts with twist-to-turn on. Players can still toggle it with A / X. |
 | `turn-speed` | `45` | Degrees per second of smooth turning while you fly, with the right stick pushed right over (or the pen twisted twice `turn-twist`). |

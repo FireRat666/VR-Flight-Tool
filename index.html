@@ -115,7 +115,7 @@
         <h3>On PC</h3>
         <ol>
           <li><strong>Click the pen</strong> to pick it up. While you hold it you hover.</li>
-          <li><strong>Arrow keys</strong> fly you where you're looking. <kbd>Space</kbd> flies up and <kbd>Tab</kbd> flies down.</li>
+          <li><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> fly you where you're looking. <kbd>E</kbd> flies up and <kbd>Q</kbd> flies down. They work in either hand.</li>
           <li><strong>Hold <kbd>3</kbd></strong> to fly by the pen's position like in VR: move the mouse, and scroll to push the pen away or pull it in.</li>
           <li><strong>Drop the pen</strong> to land.</li>
         </ol>
@@ -191,6 +191,8 @@
   script="https://flight-tool.firer.at/snippet.js"
   position="0 1 1"
   sync="false"
+  sync-limit="10"
+  sync-per-player="2"
   max-speed="10"
   dead-zone="0.02"
   full-range="0.3"
@@ -224,11 +226,13 @@
               <tr><td><code>position</code></td><td><code>0 1 1</code></td><td>Where the pen waits (a Unity world position), and where it goes back to.</td></tr>
               <tr><td><code>tool-2-position</code>, <code>tool-3-position</code>, ...</td><td>(none)</td><td>More pens, each one <code>x y z</code>. Add as many as you like; they all use the settings below.</td></tr>
               <tr><td><code>sync</code></td><td><code>false</code></td><td><code>true</code> lets everyone see the pen each player takes (each player still gets one of their own, so one spot serves any number of people). <code>false</code>: others don't see your pen.</td></tr>
+              <tr><td><code>sync-limit</code></td><td><code>10</code></td><td>With <code>sync</code>, the most shared pens in the space at once. Pens taken past it aren't shared: they're the taker's own, as with sync off.</td></tr>
+              <tr><td><code>sync-per-player</code></td><td><code>2</code></td><td>With <code>sync</code>, the most shared pens each player can have. Past it, their pens are their own.</td></tr>
               <tr><td><code>max-speed</code></td><td><code>10</code></td><td>Top speed in metres per second.</td></tr>
               <tr><td><code>dead-zone</code></td><td><code>0.02</code></td><td>Metres round the start point that don't move you, so a shaky hand still hovers.</td></tr>
               <tr><td><code>full-range</code></td><td><code>0.3</code></td><td>How far past the dead zone (in metres) you move the pen for top speed. Speed grows with the square of the distance, so small movements give fine control.</td></tr>
               <tr><td><code>response</code></td><td><code>6</code></td><td>How quickly your speed follows the pen. Higher feels snappier, lower floatier.</td></tr>
-              <tr><td><code>key-speed</code></td><td><code>5</code></td><td>Speed in metres per second for the PC keys (arrow keys, Space, Tab).</td></tr>
+              <tr><td><code>key-speed</code></td><td><code>5</code></td><td>Speed in metres per second for the PC keys (W A S D, E, Q).</td></tr>
               <tr><td><code>climb-speed</code></td><td><code>3</code></td><td>Metres per second up or down with the right stick pushed right over, while you fly or hover (VR).</td></tr>
               <tr><td><code>turning</code></td><td><code>false</code></td><td><code>true</code> starts with twist-to-turn on. Players can still toggle it with <kbd>A</kbd> / <kbd>X</kbd>.</td></tr>
               <tr><td><code>turn-speed</code></td><td><code>45</code></td><td>Degrees per second of smooth turning while you fly, with the right stick pushed right over.</td></tr>
