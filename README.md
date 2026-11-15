@@ -26,7 +26,7 @@ To try it, open <https://flight-tool.firer.at> as a space in Altspace.
 
 A pen waits at each Flight Tool spot, with a **Grab the pen to fly** label over it. The first time you pick one up, a toast shows the controls for VR or PC.
 
-Each player gets a pen of their own: picking up the one at the spot leaves a new one there for the next person. When you let go of your pen it comes along with you, staying where you left it beside you (and coming round with you when you turn), so you can grab it again whenever you like. With `sync="true"` it works the same way, and everyone else sees the pen you took too: in your hand, or following you. So any number of people can fly with one spot.
+Each player gets a pen of their own: picking up the one at the spot leaves a new one there for the next person. When you let go of your pen it comes along with you, staying where you left it beside you (and coming round with you when you turn), so you can grab it again whenever you like, until it goes away `return-after` seconds after you let go. Taking a new pen from a spot sends your let-go pens away at once (not one you're still holding). With `sync="true"` it works the same way, and everyone else sees the pen you took too: in your hand, or following you. So any number of people can fly with one spot.
 
 ## Add it to an Altspace world (snippet)
 
@@ -88,8 +88,8 @@ All optional. An empty setting uses the default.
 | `turn-speed` | `45` | Degrees per second of smooth turning while you fly, with the right stick pushed right over (or the pen twisted twice `turn-twist`). |
 | `turn-twist` | `25` | How far (in degrees) the pen has to be twisted before you start turning. |
 | `turn-ease` | `4` | How quickly turning speeds up and slows down, per second. Lower is gentler. |
-| `return-after` | `30` | Seconds after it's dropped before the pen goes away (a new one already waits at the spot), unless it's following you. `0` leaves it where it was dropped. |
-| `follow` | `true` | A pen of your own that you let go of comes along with you, so it's always to hand. `false` leaves it where you let go. |
+| `return-after` | `30` | Seconds after you let go of a pen before it goes away (a new one already waits at the spot), following you or not. `false` (or `0`): pens never go away. Taking a new pen sends your let-go pens away at once. |
+| `follow` | `true` | A pen you let go of comes along with you, so it's always to hand (until it goes away, `return-after`). `false` leaves it where you let go. |
 | `hover` | `false` | `true` starts with hover on: letting go of the trigger leaves you hovering instead of falling. Players toggle it with B. |
 | `help` | `true` | `false` skips the toast with the controls the first time someone picks up a pen. |
 | `label` | `true` | `false` hides the **Grab the pen to fly** label over the pen's spot. |

@@ -32,8 +32,8 @@
 //   turn-speed    Degrees per second of smooth turning while flying (right stick, or twist). Default 45
 //   turn-twist    Degrees of twist before you start turning (as much again for full speed). Default 25
 //   turn-ease     How quickly turning speeds up and slows down, per second.           Default 4
-//   return-after  Seconds after it's dropped before the pen goes home (0 = never).     Default 30
-//                 A pen of your own that follows you doesn't go away.
+//   return-after  Seconds after you let go before the pen goes away ("false" or 0:     Default 30
+//                 never). Taking a new pen sends your let-go ones away at once.
 //   follow        "false": a pen you let go of stays put, instead of coming with you. Default true
 //   hover         "true": start with hover on (B toggles it): you hover when you
 //                 let go of the trigger, rather than fall.                             Default false
@@ -44,7 +44,7 @@
   const SNIPPET_NAME = 'fly';
   const BUNDLE_FILE = 'penflight';
   // The app caches kit bundles by URL, so bump this whenever the bundles are rebuilt.
-  const BUNDLE_VERSION = '12';
+  const BUNDLE_VERSION = '13';
   // Return IDs the kit's graph listens for.
   const SET_ID = 'pen-flight-set';
   const OWN_ID = 'pen-flight-own';
@@ -101,6 +101,8 @@
     const attr = (name) => (el.getAttribute(name) || '').trim();
     const vars = {};
     for (const [name, key, fallback] of NUMBERS) {
+      // return-after="false" (or "never"): pens never go away, like 0.
+      if (name === 'return-after' && /^(false|never|off)$/i.test(attr(name))) { vars[key] = 0; continue; }
       const n = parseFloat(attr(name));
       vars[key] = Number.isFinite(n) ? n : fallback;
     }

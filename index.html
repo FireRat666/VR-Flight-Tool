@@ -120,7 +120,7 @@
           <li><strong>Drop the pen</strong> to land.</li>
         </ol>
         <p>A pen waits where the world's builder put it, with a <strong>Grab the pen to fly</strong> label over it. The first time you pick one up, a message shows the controls for VR or PC.</p>
-        <p>Each player gets a pen of their own: when you pick one up, a new one appears in its place for the next person. When you let go of your pen it comes along with you (and round with you when you turn), so you can grab it again whenever you like. A world can also let everyone see the pens people take (<code>sync</code>): in their hands, or following them.</p>
+        <p>Each player gets a pen of their own: when you pick one up, a new one appears in its place for the next person. When you let go of your pen it comes along with you (and round with you when you turn), so you can grab it again whenever you like, until it goes away 30 seconds after you let go. Taking a new pen sends your let-go pens away. A world can also let everyone see the pens people take (<code>sync</code>): in their hands, or following them.</p>
       </section>
 
       <section id="guide">
@@ -238,8 +238,8 @@
               <tr><td><code>turn-speed</code></td><td><code>45</code></td><td>Degrees per second of smooth turning while you fly, with the right stick pushed right over.</td></tr>
               <tr><td><code>turn-ease</code></td><td><code>4</code></td><td>How quickly turning speeds up and slows down, per second. Lower is gentler.</td></tr>
               <tr><td><code>turn-twist</code></td><td><code>25</code></td><td>How far (in degrees) the pen has to be twisted before you start turning.</td></tr>
-              <tr><td><code>return-after</code></td><td><code>30</code></td><td>Seconds after it's dropped before the pen goes away (a new one already waits at the spot), unless it's following you. <code>0</code> leaves it where it was dropped.</td></tr>
-              <tr><td><code>follow</code></td><td><code>true</code></td><td>A pen of your own that you let go of comes along with you, so it's always to hand. <code>false</code> leaves it where you let go.</td></tr>
+              <tr><td><code>return-after</code></td><td><code>30</code></td><td>Seconds after you let go of a pen before it goes away (a new one already waits at the spot), following you or not. <code>false</code> (or <code>0</code>): pens never go away. Taking a new pen sends your let-go pens away at once.</td></tr>
+              <tr><td><code>follow</code></td><td><code>true</code></td><td>A pen you let go of comes along with you, so it's always to hand (until it goes away, <code>return-after</code>). <code>false</code> leaves it where you let go.</td></tr>
               <tr><td><code>hover</code></td><td><code>false</code></td><td><code>true</code> starts with hover on: letting go of the trigger leaves you hovering instead of falling. Players toggle it with <kbd>B</kbd>.</td></tr>
               <tr><td><code>help</code></td><td><code>true</code></td><td><code>false</code> skips the message with the controls the first time someone picks up a pen.</td></tr>
               <tr><td><code>label</code></td><td><code>true</code></td><td><code>false</code> hides the <strong>Grab the pen to fly</strong> label over the pen's spot.</td></tr>
@@ -331,10 +331,12 @@
     <!-- snippet section -->
     <bs-snippet name="fly" title="Flight Tool" single="true"
       description="A pen that flies you anywhere in 3D: hold the trigger and move your hand. Works at any level, in VR and on PC."
-      script="https://flight-tool.firer.at/snippet.js?01"
+      script="https://flight-tool.firer.at/snippet.js?02"
       position="0 1 1"
       tool-2-position="3 1 1"
       sync="true"
+      sync-limit="10"
+      sync-per-player="2"
       max-speed="10"
       dead-zone="0.02"
       full-range="0.3"
