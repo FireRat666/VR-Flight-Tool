@@ -13,7 +13,7 @@ To try it, open <https://flight-tool.firer.at> as a space in Altspace.
 1. Grab the pen with grip.
 2. Hold the trigger and move your hand. A line runs from where you pressed the trigger to the pen's tip, and you fly along it: up, down, left, right, forward, back, or any mix. The further from the start point, the faster.
 3. Hold the pen still at the start point to hover.
-4. Let go of the trigger and you fall as normal, keeping the speed you had. Press **B** or **Y** to switch hover on, and you stay where you are instead.
+4. Let go of the trigger and you fall as normal, keeping the speed you had. Press **B** or **Y** to switch hover on, and you stay where you are instead (the left stick still walks you about at that height).
 5. While you fly (or hover), push the **right stick** left or right to turn smoothly. The start point turns with you. On the ground both sticks work as usual.
 6. Twist-to-turn is optional: press **A** or **X** to switch it on or off. While it's on, an orange fin sticks out of the pen, and when you fly a matching fin at the start point shows where the pen's fin started. Twist the pen like a key, clockwise to turn right and anticlockwise to turn left. The further you twist, the faster you turn.
 
