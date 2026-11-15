@@ -14,7 +14,7 @@ To try it, open <https://flight-tool.firer.at> as a space in Altspace.
 2. Hold the trigger and move your hand. A line runs from where you pressed the trigger to the pen's tip, and you fly along it: up, down, left, right, forward, back, or any mix. The further from the start point, the faster.
 3. Hold the pen still at the start point to hover.
 4. Let go of the trigger and you fall as normal, keeping the speed you had. Press **B** (on the right controller, whichever hand holds the pen) to switch hover on, and you stay where you are instead (the left stick still walks you about at that height).
-5. While you fly (or hover), push the **right stick** left or right to turn smoothly, and up or down to climb or sink. The start point turns with you. On the ground both sticks work as usual.
+5. While you fly, push the **right stick** left or right to turn smoothly; the start point turns with you. While you fly or hover, push it up or down to climb or sink. When you aren't flying by the pen (on the ground, or just hovering), it turns you the usual way.
 6. Twist-to-turn is optional: press **A** or **X** to switch it on or off. While it's on, an orange fin sticks out of the pen, and when you fly a matching fin at the start point shows where the pen's fin started. Twist the pen like a key, clockwise to turn right and anticlockwise to turn left. The further you twist, the faster you turn.
 
 **On PC**
@@ -95,7 +95,7 @@ All optional. An empty setting uses the default.
 
 - Only the person flying sees the line and the start point. With `sync="true"` everyone sees the pen too; otherwise each player only sees their own.
 - The pen pushes you rather than teleporting you, so walls and floors still stop you.
-- Turning works by small teleports, one each frame. The pen learns where a teleport puts you, so the first moment of your first turn may nudge you slightly. While you fly, the right stick's usual snap turning is off; on the ground it works as usual.
+- Turning works by small teleports, one each frame. The pen learns where a teleport puts you, so the first moment of your first turn may nudge you slightly. While you fly by the pen, the right stick's usual turning is off; the rest of the time (hovering included) it works as usual.
 
 ## How it works
 
