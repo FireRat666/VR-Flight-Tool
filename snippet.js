@@ -42,7 +42,7 @@
   const SNIPPET_NAME = 'fly';
   const BUNDLE_FILE = 'penflight';
   // The app caches kit bundles by URL, so bump this whenever the bundles are rebuilt.
-  const BUNDLE_VERSION = '7';
+  const BUNDLE_VERSION = '8';
   // Return IDs the kit's graph listens for.
   const SET_ID = 'pen-flight-set';
   const LOG = 'Flight Tool (snippet)';
