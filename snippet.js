@@ -44,7 +44,7 @@
   const SNIPPET_NAME = 'fly';
   const BUNDLE_FILE = 'penflight';
   // The app caches kit bundles by URL, so bump this whenever the bundles are rebuilt.
-  const BUNDLE_VERSION = '15';
+  const BUNDLE_VERSION = '16';
   // Return IDs the kit's graph listens for.
   const SET_ID = 'pen-flight-set';
   const OWN_ID = 'pen-flight-own';
@@ -172,8 +172,8 @@
   };
 
   // ---- Sync: every player still takes a pen of their own from the spot, and everyone sees it.
-  // The pen you take asks for a network id (penFlightTaken); it's listed in your user state, and every other
-  // player's page spawns a copy of it named "key~id" (a mirror), which follows your pen. When your pen goes away
+  // The pen waiting at the spot gets a network id (penFlightReserve); once taken it's listed in your user state
+  // (penFlightTaken), and every other player's page spawns a copy of it named "key~id" (a mirror), which follows your pen. When your pen goes away
   // (penFlightGone) or you leave, the copies go too.
   const mine = new Map();      // id -> key, your shared pens
   const shared = new Map();    // another player's uid -> their "key~id" entries
@@ -185,10 +185,24 @@
     BS.Scene.GetInstance().SetUserProps({ [PENS_PROP]: list });
   };
 
-  window.penFlightTaken = (key) => {
+  // The pen waiting at a spot asks for its network id before anyone takes it (switching sharing on while it's in
+  // your hand froze it there). Having an id doesn't share it yet: nobody else makes a copy of it until it's taken.
+  window.penFlightReserve = (key) => {
     key = String(key);
     const scene = BS.Scene.GetInstance();
-    // Past a limit the pen isn't shared: it stays your own, as with sync off.
+    const uid = safe(scene.localUser && scene.localUser.uid) || 'me';
+    const id = `${key}-${uid}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+    scene.SendToVisualScripting(OWN_ID, `${key}|${id}`)
+      .catch((e) => console.warn(`${LOG}: giving pen ${id} an id failed`, e));
+    return true;
+  };
+
+  // The pen with id `id` was taken from spot `key`: list it, so everyone else sees it. Past a limit it isn't
+  // listed, so nobody else sees it: it stays your own, as with sync off.
+  window.penFlightTaken = (key, id) => {
+    key = String(key);
+    id = String(id || '');
+    if (!id) return false;
     const place = placements.get(key);
     const limits = place ? place.limits : { total: 10, perPlayer: 2 };
     let total = mine.size;
@@ -197,12 +211,8 @@
       console.log(`${LOG}: not sharing this pen (${mine.size} of ${limits.perPlayer} yours, ${total} of ${limits.total} in the space)`);
       return false;
     }
-    const uid = safe(scene.localUser && scene.localUser.uid) || 'me';
-    const id = `${key}-${uid}-${Date.now().toString(36)}`;
     mine.set(id, key);
-    scene.SendToVisualScripting(OWN_ID, `${key}|${id}`)
-      .then(publish)
-      .catch((e) => console.warn(`${LOG}: sharing pen ${id} failed`, e));
+    publish();
     return true;
   };
 
