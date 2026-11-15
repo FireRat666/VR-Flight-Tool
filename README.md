@@ -14,8 +14,8 @@ To try it, open <https://flight-tool.firer.at> as a space in Altspace.
 2. Hold the trigger and move your hand. A line runs from where you pressed the trigger to the pen's tip, and you fly along it: up, down, left, right, forward, back, or any mix. The further from the start point, the faster.
 3. Hold the pen still at the start point to hover.
 4. Let go of the trigger and you fall as normal, keeping the speed you had. Press **B** or **Y** to switch hover on, and you stay where you are instead.
-5. Push the stick of the hand holding the pen left or right to turn smoothly. The start point turns with you. (While you hold the pen the stick doesn't snap turn.)
-6. Twist-to-turn is optional: press **A** or **X** to switch it on (an orange band shows on the pen) or off. While it's on and you're flying, twist the pen clockwise to turn right and anticlockwise to turn left. The further you twist, the faster you turn.
+5. While you fly (or hover), push the **right stick** left or right to turn smoothly. The start point turns with you. On the ground both sticks work as usual.
+6. Twist-to-turn is optional: press **A** or **X** to switch it on or off. While it's on, an orange fin sticks out of the pen, and when you fly a matching fin at the start point shows where the pen's fin started. Twist the pen like a key, clockwise to turn right and anticlockwise to turn left. The further you twist, the faster you turn.
 
 **On PC**
 
@@ -26,7 +26,7 @@ To try it, open <https://flight-tool.firer.at> as a space in Altspace.
 
 A pen waits at each Flight Tool spot, with a **Grab the pen to fly** label over it. The first time you pick one up, a toast shows the controls for VR or PC.
 
-Each player gets a pen of their own: picking up the one at the spot leaves a new one there for the next person. When you let go of your pen it comes along with you, staying where you left it beside you, so you can grab it again whenever you like. With `sync="true"` the spot is instead one shared pen everyone sees, which goes back to its spot `return-after` seconds after it's dropped.
+Each player gets a pen of their own: picking up the one at the spot leaves a new one there for the next person. When you let go of your pen it comes along with you, staying where you left it beside you (and coming round with you when you turn), so you can grab it again whenever you like. With `sync="true"` the spot is instead one shared pen everyone sees, which goes back to its spot `return-after` seconds after it's dropped.
 
 ## Add it to an Altspace world (snippet)
 
@@ -45,8 +45,9 @@ In a Creator SDK world, add an empty GameObject at the origin, click **Add Compo
   response="6"
   key-speed="5"
   turning="false"
-  turn-speed="90"
+  turn-speed="45"
   turn-twist="25"
+  turn-ease="4"
   return-after="30"
   follow="true"
   hover="false"
@@ -78,8 +79,9 @@ All optional. An empty setting uses the default.
 | `response` | `6` | How quickly your speed follows the pen, per second. Higher feels snappier, lower floatier. |
 | `key-speed` | `5` | Speed in metres per second for the PC keys (arrow keys, Space, Tab). |
 | `turning` | `false` | `true` starts with twist-to-turn on. Players can still toggle it with A / X. |
-| `turn-speed` | `90` | Degrees per second of smooth turning, with the stick pushed right over (or the pen twisted twice `turn-twist`). |
+| `turn-speed` | `45` | Degrees per second of smooth turning while you fly, with the right stick pushed right over (or the pen twisted twice `turn-twist`). |
 | `turn-twist` | `25` | How far (in degrees) the pen has to be twisted before you start turning. |
+| `turn-ease` | `4` | How quickly turning speeds up and slows down, per second. Lower is gentler. |
 | `return-after` | `30` | Seconds after it's dropped before the pen goes home: a shared pen moves back to `position`; a pen of your own goes away (a new one already waits there) unless it's following you. `0` leaves it where it was dropped. |
 | `follow` | `true` | A pen of your own that you let go of comes along with you, so it's always to hand. `false` leaves it where you let go. |
 | `hover` | `false` | `true` starts with hover on: letting go of the trigger leaves you hovering instead of falling. Players toggle it with B / Y. |
@@ -91,7 +93,7 @@ All optional. An empty setting uses the default.
 
 - Only the person flying sees the line and the start point. With `sync="true"` everyone sees the pen too; otherwise each player only sees their own.
 - The pen pushes you rather than teleporting you, so walls and floors still stop you.
-- Turning works by small teleports, one each frame. The pen learns where a teleport puts you, so the first moment of your first turn may nudge you slightly. While you hold the pen in VR, the stick's usual snap turning is off.
+- Turning works by small teleports, one each frame. The pen learns where a teleport puts you, so the first moment of your first turn may nudge you slightly. While you fly, the right stick's usual snap turning is off; on the ground it works as usual.
 
 ## How it works
 
@@ -99,7 +101,7 @@ JavaScript can't fly a player smoothly, but Visual Scripting can. So `snippet.js
 
 The kit's graph listens for these, each starting with the key of the pens it's for, or `*` for every pen:
 
-- `pen-flight-set` with `"key|MaxSpeed=12"` and so on (the graph's variable names: `MaxSpeed`, `DeadZone`, `FullRange`, `Response`, `KeySpeed`, `TurnSpeed`, `TurnTwist`, `ReturnAfter`, `Follow`, `Hover`, `Help`, `ShowLabel`, `Sync`, and `Turning`; switches are `1` or `0`).
+- `pen-flight-set` with `"key|MaxSpeed=12"` and so on (the graph's variable names: `MaxSpeed`, `DeadZone`, `FullRange`, `Response`, `KeySpeed`, `TurnSpeed`, `TurnTwist`, `TurnEase`, `ReturnAfter`, `Follow`, `Hover`, `Help`, `ShowLabel`, `Sync`, and `Turning`; switches are `1` or `0`).
 - `pen-flight-home` with `"key|"`: sends the pen back to where it spawned.
 - `pen-flight-bring` with `"key|"`: puts the pen in front of you.
 

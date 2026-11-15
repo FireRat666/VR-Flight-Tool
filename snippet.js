@@ -26,8 +26,9 @@
 //   response      How quickly your speed follows the pen, per second.                  Default 6
 //   key-speed     Speed in m/s for the PC keys (arrow keys, Space, Tab).               Default 5
 //   turning       "true" to start with twist-to-turn on (the A / X button toggles it). Default false
-//   turn-speed    Degrees per second of smooth turning (the pen hand's stick, or twist). Default 90
+//   turn-speed    Degrees per second of smooth turning while flying (right stick, or twist). Default 45
 //   turn-twist    Degrees of twist before you start turning (as much again for full speed). Default 25
+//   turn-ease     How quickly turning speeds up and slows down, per second.           Default 4
 //   return-after  Seconds after it's dropped before the pen goes home (0 = never).     Default 30
 //                 A pen of your own that follows you doesn't go away.
 //   follow        "false": a pen you let go of stays put, instead of coming with you. Default true
@@ -40,7 +41,7 @@
   const SNIPPET_NAME = 'fly';
   const BUNDLE_FILE = 'penflight';
   // The app caches kit bundles by URL, so bump this whenever the bundles are rebuilt.
-  const BUNDLE_VERSION = '3';
+  const BUNDLE_VERSION = '4';
   // Return IDs the kit's graph listens for.
   const SET_ID = 'pen-flight-set';
   const LOG = 'Flight Tool (snippet)';
@@ -52,8 +53,9 @@
     ['full-range', 'FullRange', 0.3],
     ['response', 'Response', 6],
     ['key-speed', 'KeySpeed', 5],
-    ['turn-speed', 'TurnSpeed', 90],
+    ['turn-speed', 'TurnSpeed', 45],
     ['turn-twist', 'TurnTwist', 25],
+    ['turn-ease', 'TurnEase', 4],
     ['return-after', 'ReturnAfter', 30],
   ];
   // Attribute -> variable, default: true / false, sent as 1 / 0.
