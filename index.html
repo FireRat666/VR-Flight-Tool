@@ -120,7 +120,7 @@
           <li><strong>Drop the pen</strong> to land.</li>
         </ol>
         <p>A pen waits where the world's builder put it, with a <strong>Grab the pen to fly</strong> label over it. The first time you pick one up, a message shows the controls for VR or PC.</p>
-        <p>Each player gets a pen of their own: when you pick one up, a new one appears in its place for the next person. When you let go of your pen it comes along with you (and round with you when you turn), so you can grab it again whenever you like. A world can instead make it one <strong>shared</strong> pen that everyone sees (<code>sync</code>), which goes back to its spot 30 seconds after it's dropped.</p>
+        <p>Each player gets a pen of their own: when you pick one up, a new one appears in its place for the next person. When you let go of your pen it comes along with you (and round with you when you turn), so you can grab it again whenever you like. A world can also let everyone see the pens people take (<code>sync</code>): in their hands, or following them.</p>
       </section>
 
       <section id="guide">
@@ -223,7 +223,7 @@
             <tbody>
               <tr><td><code>position</code></td><td><code>0 1 1</code></td><td>Where the pen waits (a Unity world position), and where it goes back to.</td></tr>
               <tr><td><code>tool-2-position</code>, <code>tool-3-position</code>, ...</td><td>(none)</td><td>More pens, each one <code>x y z</code>. Add as many as you like; they all use the settings below.</td></tr>
-              <tr><td><code>sync</code></td><td><code>false</code></td><td><code>true</code> makes each spot one shared pen that everyone sees in the holder's hand. <code>false</code> gives every player a pen of their own (others don't see it).</td></tr>
+              <tr><td><code>sync</code></td><td><code>false</code></td><td><code>true</code> lets everyone see the pen each player takes (each player still gets one of their own, so one spot serves any number of people). <code>false</code>: others don't see your pen.</td></tr>
               <tr><td><code>max-speed</code></td><td><code>10</code></td><td>Top speed in metres per second.</td></tr>
               <tr><td><code>dead-zone</code></td><td><code>0.02</code></td><td>Metres round the start point that don't move you, so a shaky hand still hovers.</td></tr>
               <tr><td><code>full-range</code></td><td><code>0.3</code></td><td>How far past the dead zone (in metres) you move the pen for top speed. Speed grows with the square of the distance, so small movements give fine control.</td></tr>
@@ -234,7 +234,7 @@
               <tr><td><code>turn-speed</code></td><td><code>45</code></td><td>Degrees per second of smooth turning while you fly, with the right stick pushed right over.</td></tr>
               <tr><td><code>turn-ease</code></td><td><code>4</code></td><td>How quickly turning speeds up and slows down, per second. Lower is gentler.</td></tr>
               <tr><td><code>turn-twist</code></td><td><code>25</code></td><td>How far (in degrees) the pen has to be twisted before you start turning.</td></tr>
-              <tr><td><code>return-after</code></td><td><code>30</code></td><td>Seconds after it's dropped before the pen goes home: a shared pen moves back to <code>position</code>; a pen of your own goes away (a new one already waits there) unless it's following you. <code>0</code> leaves it where it was dropped.</td></tr>
+              <tr><td><code>return-after</code></td><td><code>30</code></td><td>Seconds after it's dropped before the pen goes away (a new one already waits at the spot), unless it's following you. <code>0</code> leaves it where it was dropped.</td></tr>
               <tr><td><code>follow</code></td><td><code>true</code></td><td>A pen of your own that you let go of comes along with you, so it's always to hand. <code>false</code> leaves it where you let go.</td></tr>
               <tr><td><code>hover</code></td><td><code>false</code></td><td><code>true</code> starts with hover on: letting go of the trigger leaves you hovering instead of falling. Players toggle it with <kbd>B</kbd>.</td></tr>
               <tr><td><code>help</code></td><td><code>true</code></td><td><code>false</code> skips the message with the controls the first time someone picks up a pen.</td></tr>

@@ -12,13 +12,13 @@
 // window.penFlightReady(key), and this script answers with the settings (the same for every spot).
 //
 // By default everyone has pens of their own: picking up the one waiting at `position` leaves a new one there, and a
-// pen you let go of comes along with you (`follow`), so it's always to hand. With sync="true" each spot is
-// one shared pen that everyone sees, and it goes back to `position` `return-after` seconds after it's dropped.
+// pen you let go of comes along with you (`follow`), so it's always to hand. With sync="true" that still
+// happens, and everyone else sees the pen you took too, in your hand or following you.
 //
 // Settings (attributes on the element, all optional):
 //   position      Where the pen waits, "x y z" (Unity world position).                Default "0 1 1"
 //   tool-N-position  More pens, N = 2, 3, 4...: each one "x y z", any number of them.  Default none
-//   sync          "true": one shared pen everyone sees, instead of a pen each.         Default false
+//   sync          "true": everyone sees the pen each player takes (still one each).   Default false
 //   max-speed     Top speed in m/s, with the pen full-range past the dead zone.       Default 10
 //   dead-zone     Metres round the start point that don't move you.                    Default 0.02
 //   full-range    Metres past the dead zone for top speed (speed grows with the
@@ -42,9 +42,12 @@
   const SNIPPET_NAME = 'fly';
   const BUNDLE_FILE = 'penflight';
   // The app caches kit bundles by URL, so bump this whenever the bundles are rebuilt.
-  const BUNDLE_VERSION = '10';
+  const BUNDLE_VERSION = '11';
   // Return IDs the kit's graph listens for.
   const SET_ID = 'pen-flight-set';
+  const OWN_ID = 'pen-flight-own';
+  // Your user state: the shared pens you have, "key~id,key~id", so everyone else's page shows a copy of each.
+  const PENS_PROP = 'fly-pens';
   const LOG = 'Flight Tool (snippet)';
 
   // Attribute -> the graph's Object variable, and its default.
@@ -104,7 +107,7 @@
       vars[key] = (v === '' ? fallback : v === 'true') ? 1 : 0;
     }
     const position = parsePosition(attr('position')) || [0, 1, 1];
-    return { vars, position };
+    return { vars, position, el };
   };
 
   const send = async (key) => {
@@ -151,8 +154,65 @@
       // "*" = the first prefab in the AssetBundle on this same object.
       await obj.AddComponent(new BS.KitItem({ path: '*' }));
       console.log(`${LOG}: loading pen ${key} (bundle v${BUNDLE_VERSION}) at ${position.join(' ')}${synced ? ', synced' : ''}`);
+      return obj;
     } catch (e) {
       console.error(`${LOG}: failed to start ${key}`, e);
+      return null;
+    }
+  };
+
+  // ---- Sync: every player still takes a pen of their own from the spot, and everyone sees it.
+  // The pen you take asks for a network id (penFlightTaken); it's listed in your user state, and every other
+  // player's page spawns a copy of it named "key~id" (a mirror), which follows your pen. When your pen goes away
+  // (penFlightGone) or you leave, the copies go too.
+  const mine = new Map();      // id -> key, your shared pens
+  const shared = new Map();    // another player's uid -> their "key~id" entries
+  const mirrors = new Map();   // "key~id" -> { obj } for the copies of other players' pens
+  const safe = (text) => String(text || '').replace(/[^A-Za-z0-9_-]/g, '');
+
+  const publish = () => {
+    const list = Array.from(mine, ([id, key]) => `${key}~${id}`).join(',');
+    BS.Scene.GetInstance().SetUserProps({ [PENS_PROP]: list });
+  };
+
+  window.penFlightTaken = (key) => {
+    key = String(key);
+    const scene = BS.Scene.GetInstance();
+    const uid = safe(scene.localUser && scene.localUser.uid) || 'me';
+    const id = `${key}-${uid}-${Date.now().toString(36)}`;
+    mine.set(id, key);
+    scene.SendToVisualScripting(OWN_ID, `${key}|${id}`)
+      .then(publish)
+      .catch((e) => console.warn(`${LOG}: sharing pen ${id} failed`, e));
+    return true;
+  };
+
+  window.penFlightGone = (id) => {
+    if (mine.delete(String(id))) publish();
+    return true;
+  };
+
+  const syncMirrors = () => {
+    const wanted = new Set();
+    for (const list of shared.values()) for (const entry of list) wanted.add(entry);
+    for (const [entry, mirror] of mirrors) {
+      if (wanted.has(entry)) continue;
+      mirrors.delete(entry);
+      if (mirror.obj) mirror.obj.Destroy();
+      mirror.gone = true;
+    }
+    for (const entry of wanted) {
+      if (mirrors.has(entry)) continue;
+      const key = entry.split('~')[0];
+      const place = placements.get(key);
+      // Not a spot here (yet): tried again once the spots have started.
+      if (!place || !place.vars.Sync) continue;
+      const mirror = { obj: null, gone: false };
+      mirrors.set(entry, mirror);
+      spawnPen(place.el, entry, place.position, true).then((obj) => {
+        if (mirror.gone && obj) obj.Destroy();
+        else mirror.obj = obj;
+      });
     }
   };
 
@@ -165,14 +225,28 @@
     const settings = readSettings(el);
     for (const { n, position } of penSpots(el, settings.position)) {
       const key = `${base}-${n}`;
-      placements.set(key, settings);
+      placements.set(key, { ...settings, position });
       await spawnPen(el, key, position, settings.vars.Sync);
     }
+    syncMirrors();
   };
 
   const scan = () => document.querySelectorAll(`bs-snippet[name="${SNIPPET_NAME}"]`).forEach(start);
 
   window.addEventListener('bs-loaded', () => {
+    const scene = BS.Scene.GetInstance();
+    scene.On('user-state-changed', (e) => {
+      const user = e.detail && e.detail.user;
+      if (!user || user.isLocal) return;
+      for (const change of e.detail.changes || []) {
+        if (change.key !== PENS_PROP) continue;
+        shared.set(user.uid, String(change.newValue || '').split(',').filter((entry) => entry.includes('~')));
+        syncMirrors();
+      }
+    });
+    scene.On('user-left', (e) => {
+      if (e.detail && shared.delete(e.detail.uid)) syncMirrors();
+    });
     scan();
     // Placements added later, e.g. with document.createElement('bs-snippet').
     new MutationObserver(scan).observe(document.body, { childList: true, subtree: true });

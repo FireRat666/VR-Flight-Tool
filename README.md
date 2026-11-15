@@ -26,7 +26,7 @@ To try it, open <https://flight-tool.firer.at> as a space in Altspace.
 
 A pen waits at each Flight Tool spot, with a **Grab the pen to fly** label over it. The first time you pick one up, a toast shows the controls for VR or PC.
 
-Each player gets a pen of their own: picking up the one at the spot leaves a new one there for the next person. When you let go of your pen it comes along with you, staying where you left it beside you (and coming round with you when you turn), so you can grab it again whenever you like. With `sync="true"` the spot is instead one shared pen everyone sees, which goes back to its spot `return-after` seconds after it's dropped.
+Each player gets a pen of their own: picking up the one at the spot leaves a new one there for the next person. When you let go of your pen it comes along with you, staying where you left it beside you (and coming round with you when you turn), so you can grab it again whenever you like. With `sync="true"` it works the same way, and everyone else sees the pen you took too: in your hand, or following you. So any number of people can fly with one spot.
 
 ## Add it to an Altspace world (snippet)
 
@@ -73,7 +73,7 @@ All optional. An empty setting uses the default.
 | :--- | :--- | :--- |
 | `position` | `0 1 1` | Where the pen waits (a Unity world position), and where it goes back to. |
 | `tool-2-position`, `tool-3-position`, ... | (none) | More pens, each one `x y z`. Any number, gaps are fine; an empty value is skipped. They all use the same settings. |
-| `sync` | `false` | `true` makes each spot one shared pen that everyone sees in the holder's hand. `false` gives every player a pen of their own (others don't see it). Each pen's network id comes from the placement's instance and the pen's number, so it's the same for everyone. |
+| `sync` | `false` | `true` lets everyone see the pen each player takes (each player still gets one of their own, so one spot serves any number of people). `false`: others don't see your pen. |
 | `max-speed` | `10` | Top speed in metres per second. |
 | `dead-zone` | `0.02` | Metres round the start point that don't move you, so a shaky hand still hovers. |
 | `full-range` | `0.3` | How far past the dead zone (in metres) you move the pen for top speed. Speed grows with the square of the distance, so small movements give fine control. |
@@ -84,7 +84,7 @@ All optional. An empty setting uses the default.
 | `turn-speed` | `45` | Degrees per second of smooth turning while you fly, with the right stick pushed right over (or the pen twisted twice `turn-twist`). |
 | `turn-twist` | `25` | How far (in degrees) the pen has to be twisted before you start turning. |
 | `turn-ease` | `4` | How quickly turning speeds up and slows down, per second. Lower is gentler. |
-| `return-after` | `30` | Seconds after it's dropped before the pen goes home: a shared pen moves back to `position`; a pen of your own goes away (a new one already waits there) unless it's following you. `0` leaves it where it was dropped. |
+| `return-after` | `30` | Seconds after it's dropped before the pen goes away (a new one already waits at the spot), unless it's following you. `0` leaves it where it was dropped. |
 | `follow` | `true` | A pen of your own that you let go of comes along with you, so it's always to hand. `false` leaves it where you let go. |
 | `hover` | `false` | `true` starts with hover on: letting go of the trigger leaves you hovering instead of falling. Players toggle it with B. |
 | `help` | `true` | `false` skips the toast with the controls the first time someone picks up a pen. |
