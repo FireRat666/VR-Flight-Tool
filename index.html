@@ -108,8 +108,8 @@
           <li><strong>Grab the pen</strong> with grip.</li>
           <li><strong>Hold the trigger</strong> and move your hand. A line runs from where you pressed the trigger to the pen's tip, and you fly along it: up, down, left, right, forward, back, or any mix. The further from the start, the faster.</li>
           <li><strong>Hover</strong> by holding the pen still at the start point. Bring it back towards the start to slow down.</li>
-          <li><strong>Let go of the trigger</strong> and you fall as normal, keeping the speed you had. Press <kbd>B</kbd> or <kbd>Y</kbd> to switch <strong>hover</strong> on, and you stay where you are instead (the left stick still walks you about at that height).</li>
-          <li><strong>Turn</strong> smoothly with the <strong>right stick</strong> while you fly or hover. The start point turns with you. On the ground both sticks work as usual.</li>
+          <li><strong>Let go of the trigger</strong> and you fall as normal, keeping the speed you had. Press <kbd>B</kbd> (on the right controller, whichever hand holds the pen) to switch <strong>hover</strong> on, and you stay where you are instead (the left stick still walks you about at that height).</li>
+          <li><strong>Turn</strong> smoothly with the <strong>right stick</strong> left and right while you fly or hover, and push it up or down to <strong>climb or sink</strong>. The start point turns with you. On the ground both sticks work as usual.</li>
           <li><strong>Twist-to-turn (optional):</strong> press <kbd>A</kbd> or <kbd>X</kbd> to switch it on or off. While it's on, an orange fin sticks out of the pen, and when you fly a matching fin at the start point shows where it started. Twist the pen like a key, clockwise to turn right and anticlockwise to turn left. The further you twist, the faster you turn.</li>
         </ol>
         <h3>On PC</h3>
@@ -196,6 +196,7 @@
   full-range="0.3"
   response="6"
   key-speed="5"
+  climb-speed="3"
   turning="false"
   turn-speed="45"
   turn-twist="25"
@@ -228,13 +229,14 @@
               <tr><td><code>full-range</code></td><td><code>0.3</code></td><td>How far past the dead zone (in metres) you move the pen for top speed. Speed grows with the square of the distance, so small movements give fine control.</td></tr>
               <tr><td><code>response</code></td><td><code>6</code></td><td>How quickly your speed follows the pen. Higher feels snappier, lower floatier.</td></tr>
               <tr><td><code>key-speed</code></td><td><code>5</code></td><td>Speed in metres per second for the PC keys (arrow keys, Space, Tab).</td></tr>
+              <tr><td><code>climb-speed</code></td><td><code>3</code></td><td>Metres per second up or down with the right stick pushed right over, while you fly or hover (VR).</td></tr>
               <tr><td><code>turning</code></td><td><code>false</code></td><td><code>true</code> starts with twist-to-turn on. Players can still toggle it with <kbd>A</kbd> / <kbd>X</kbd>.</td></tr>
               <tr><td><code>turn-speed</code></td><td><code>45</code></td><td>Degrees per second of smooth turning while you fly, with the right stick pushed right over.</td></tr>
               <tr><td><code>turn-ease</code></td><td><code>4</code></td><td>How quickly turning speeds up and slows down, per second. Lower is gentler.</td></tr>
               <tr><td><code>turn-twist</code></td><td><code>25</code></td><td>How far (in degrees) the pen has to be twisted before you start turning.</td></tr>
               <tr><td><code>return-after</code></td><td><code>30</code></td><td>Seconds after it's dropped before the pen goes home: a shared pen moves back to <code>position</code>; a pen of your own goes away (a new one already waits there) unless it's following you. <code>0</code> leaves it where it was dropped.</td></tr>
               <tr><td><code>follow</code></td><td><code>true</code></td><td>A pen of your own that you let go of comes along with you, so it's always to hand. <code>false</code> leaves it where you let go.</td></tr>
-              <tr><td><code>hover</code></td><td><code>false</code></td><td><code>true</code> starts with hover on: letting go of the trigger leaves you hovering instead of falling. Players toggle it with <kbd>B</kbd> / <kbd>Y</kbd>.</td></tr>
+              <tr><td><code>hover</code></td><td><code>false</code></td><td><code>true</code> starts with hover on: letting go of the trigger leaves you hovering instead of falling. Players toggle it with <kbd>B</kbd>.</td></tr>
               <tr><td><code>help</code></td><td><code>true</code></td><td><code>false</code> skips the message with the controls the first time someone picks up a pen.</td></tr>
               <tr><td><code>label</code></td><td><code>true</code></td><td><code>false</code> hides the <strong>Grab the pen to fly</strong> label over the pen's spot.</td></tr>
               <tr><td><code>bundle-base</code></td><td>(empty)</td><td>A folder URL to load the pen's bundles from instead of this site.</td></tr>
@@ -334,6 +336,7 @@
       full-range="0.3"
       response="6"
       key-speed="5"
+      climb-speed="3"
       turning="false"
       turn-speed="45"
       turn-twist="25"
