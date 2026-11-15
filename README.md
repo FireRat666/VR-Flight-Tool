@@ -21,7 +21,7 @@ To try it, open <https://flight-tool.firer.at> as a space in Altspace.
 
 1. Click the pen to pick it up. While you hold it you hover.
 2. **W A S D** fly you where you're looking. **E** flies up and **Q** flies down. They work in either hand.
-3. Hold **3** to fly by the pen's position like in VR: move the mouse, and scroll to push the pen away or pull it in.
+3. Hold **3** to fly by the pen's position like in VR: move the mouse.
 4. Drop the pen to land.
 
 A pen waits at each Flight Tool spot, with a **Grab the pen to fly** label over it. The first time you pick one up, a toast shows the controls for VR or PC.
