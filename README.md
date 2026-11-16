@@ -40,7 +40,7 @@ In a Creator SDK world, add an empty GameObject at the origin, click **Add Compo
   position="0 1 1"
   sync="false"
   sync-limit="10"
-  sync-per-player="2"
+  respawn-delay="3"
   max-speed="10"
   dead-zone="0.02"
   full-range="0.3"
@@ -75,9 +75,9 @@ All optional. An empty setting uses the default.
 | :--- | :--- | :--- |
 | `position` | `0 1 1` | Where the pen waits (a Unity world position), and where it goes back to. |
 | `tool-2-position`, `tool-3-position`, ... | (none) | More pens, each one `x y z`. Any number, gaps are fine; an empty value is skipped. They all use the same settings. |
-| `sync` | `false` | `true` lets everyone see the pen each player takes (each player still gets one of their own, so one spot serves any number of people). `false`: others don't see your pen. |
-| `sync-limit` | `10` | With `sync`, the most shared pens in the space at once. Pens taken past it aren't shared: they're the taker's own, as with sync off. |
-| `sync-per-player` | `2` | With `sync`, the most shared pens each player can have. Past it, their pens are their own. |
+| `sync` | `false` | `true`: the pens are shared. Everyone sees the same pens, whoever grabs one has it, and taking one puts a new shared pen at the spot, so one spot serves any number of people. One each: taking a new pen sends your other one away. `false`: others don't see your pen. |
+| `sync-limit` | `10` | With `sync`, the most shared pens out in the space at once. Past it, the pen at each spot is a local one (only you see yours), until one goes away. |
+| `respawn-delay` | `3` | With `sync`, seconds after a shared pen is taken before the next one appears at its spot, so it isn't in the way while you get going. |
 | `max-speed` | `10` | Top speed in metres per second. |
 | `dead-zone` | `0.02` | Metres round the start point that don't move you, so a shaky hand still hovers. |
 | `full-range` | `0.3` | How far past the dead zone (in metres) you move the pen for top speed. Speed grows with the square of the distance, so small movements give fine control. |
@@ -110,6 +110,10 @@ The kit's graph listens for these, each starting with the key of the pens it's f
 - `pen-flight-set` with `"key|MaxSpeed=12"` and so on (the graph's variable names: `MaxSpeed`, `DeadZone`, `FullRange`, `Response`, `KeySpeed`, `ClimbSpeed`, `TurnSpeed`, `TurnTwist`, `TurnEase`, `ReturnAfter`, `Follow`, `Hover`, `Help`, `ShowLabel`, `Sync`, and `Turning`; switches are `1` or `0`).
 - `pen-flight-home` with `"key|"`: sends the pen back to where it spawned.
 - `pen-flight-bring` with `"key|"`: puts the pen in front of you.
+
+`pen-flight-home` and `pen-flight-bring` leave shared pens alone: a shared pen is moved by whoever has it.
+
+With `sync="true"` the page spawns the pens itself. Each spot's pens are numbered, and spawned under objects named `key~key-sN`; the graph gives the pen network id `key-sN`, the same on every page, so it's the same pen for everyone. Each player's user state (`fly-pen`, `key:N`) says which shared pen they have, and every page works out the same thing from it: the pens that are out (moved by whoever has them), and one waiting at the spot, the lowest number not out, `respawn-delay` seconds after the last one was taken. Once `sync-limit` are out, the waiting one is a local pen instead, spawned as `key~_N` (a handle for the page). Grabbing a pen from its spot takes ownership of a shared one and calls `window.penFlightTaken(key, id)`; when it's done with (`return-after`, or you take another), `window.penFlightGone(id)` clears your user state and the page takes it away, on every page for a shared one. A shared pen can be grabbed at its spot, or by the player who owns it.
 
 When new bundles are uploaded to `bundles/<platform>/penflight`, bump `BUNDLE_VERSION` in `snippet.js`: the app caches bundles by URL, so without a new version players keep the old one.
 

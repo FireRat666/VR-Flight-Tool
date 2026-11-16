@@ -193,7 +193,7 @@
   position="0 1 1"
   sync="false"
   sync-limit="10"
-  sync-per-player="2"
+  respawn-delay="3"
   max-speed="10"
   dead-zone="0.02"
   full-range="0.3"
@@ -226,9 +226,9 @@
             <tbody>
               <tr><td><code>position</code></td><td><code>0 1 1</code></td><td>Where the pen waits (a Unity world position), and where it goes back to.</td></tr>
               <tr><td><code>tool-2-position</code>, <code>tool-3-position</code>, ...</td><td>(none)</td><td>More pens, each one <code>x y z</code>. Add as many as you like; they all use the settings below.</td></tr>
-              <tr><td><code>sync</code></td><td><code>false</code></td><td><code>true</code> lets everyone see the pen each player takes (each player still gets one of their own, so one spot serves any number of people). <code>false</code>: others don't see your pen.</td></tr>
-              <tr><td><code>sync-limit</code></td><td><code>10</code></td><td>With <code>sync</code>, the most shared pens in the space at once. Pens taken past it aren't shared: they're the taker's own, as with sync off.</td></tr>
-              <tr><td><code>sync-per-player</code></td><td><code>2</code></td><td>With <code>sync</code>, the most shared pens each player can have. Past it, their pens are their own.</td></tr>
+              <tr><td><code>sync</code></td><td><code>false</code></td><td><code>true</code>: the pens are shared. Everyone sees the same pens, and taking one puts a new shared pen at the spot, so one spot serves any number of people. One each. <code>false</code>: others don't see your pen.</td></tr>
+              <tr><td><code>sync-limit</code></td><td><code>10</code></td><td>With <code>sync</code>, the most shared pens out in the space at once. Past it, the pen at each spot is a local one.</td></tr>
+              <tr><td><code>respawn-delay</code></td><td><code>3</code></td><td>With <code>sync</code>, seconds after a shared pen is taken before the next one appears at its spot.</td></tr>
               <tr><td><code>max-speed</code></td><td><code>10</code></td><td>Top speed in metres per second.</td></tr>
               <tr><td><code>dead-zone</code></td><td><code>0.02</code></td><td>Metres round the start point that don't move you, so a shaky hand still hovers.</td></tr>
               <tr><td><code>full-range</code></td><td><code>0.3</code></td><td>How far past the dead zone (in metres) you move the pen for top speed. Speed grows with the square of the distance, so small movements give fine control.</td></tr>
@@ -337,7 +337,7 @@
       tool-2-position="3 1 1"
       sync="true"
       sync-limit="10"
-      sync-per-player="2"
+      respawn-delay="3"
       max-speed="10"
       dead-zone="0.02"
       full-range="0.3"

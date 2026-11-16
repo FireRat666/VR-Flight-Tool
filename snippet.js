@@ -12,15 +12,18 @@
 // window.penFlightReady(key), and this script answers with the settings (the same for every spot).
 //
 // By default everyone has pens of their own: picking up the one waiting at `position` leaves a new one there, and a
-// pen you let go of comes along with you (`follow`), so it's always to hand. With sync="true" that still
-// happens, and everyone else sees the pen you took too, in your hand or following you.
+// pen you let go of comes along with you (`follow`), so it's always to hand.
+// With sync="true" the pens at each spot are shared, numbered 1, 2, 3... with network ids every page agrees on:
+// everyone sees the same pen, and whoever grabs it has it. Grabbing one puts a new shared pen at the spot for
+// everyone (respawn-delay seconds later), until sync-limit are out; then the spot has a plain local pen (only you see
+// yours). One pen each: taking a new one sends your other one away, for everyone.
 //
 // Settings (attributes on the element, all optional):
 //   position      Where the pen waits, "x y z" (Unity world position).                Default "0 1 1"
 //   tool-N-position  More pens, N = 2, 3, 4...: each one "x y z", any number of them.  Default none
-//   sync          "true": everyone sees the pen each player takes (still one each).   Default false
-//   sync-limit    Most shared pens in the space at once; past it, pens aren't shared. Default 10
-//   sync-per-player  Most shared pens each player can have; past it, theirs.         Default 2
+//   sync          "true": the pens are shared, and everyone sees them (one each).      Default false
+//   sync-limit    Most shared pens out in the space at once; past it, pens are local. Default 10
+//   respawn-delay Seconds after a shared pen is taken before the next one appears at its spot. Default 3
 //   max-speed     Top speed in m/s, with the pen full-range past the dead zone.       Default 10
 //   dead-zone     Metres round the start point that don't move you.                    Default 0.02
 //   full-range    Metres past the dead zone for top speed (speed grows with the
@@ -44,12 +47,12 @@
   const SNIPPET_NAME = 'fly';
   const BUNDLE_FILE = 'penflight';
   // The app caches kit bundles by URL, so bump this whenever the bundles are rebuilt.
-  const BUNDLE_VERSION = '16';
+  const BUNDLE_VERSION = '17';
   // Return IDs the kit's graph listens for.
   const SET_ID = 'pen-flight-set';
-  const OWN_ID = 'pen-flight-own';
-  // Your user state: the shared pens you have, "key~id,key~id", so everyone else's page shows a copy of each.
-  const PENS_PROP = 'fly-pens';
+  // Your user state: the shared pen you have, "key:n" (pen n of spot key), so every page counts it as taken.
+  // Not "|": the app sends user state as name|value, so a "|" in the value cuts it short for everyone else.
+  const PEN_PROP = 'fly-pen';
   const LOG = 'Flight Tool (snippet)';
 
   // Attribute -> the graph's Object variable, and its default.
@@ -111,13 +114,14 @@
       vars[key] = (v === '' ? fallback : v === 'true') ? 1 : 0;
     }
     const position = parsePosition(attr('position')) || [0, 1, 1];
-    // Limits on shared pens (sync), used here in the page only.
-    const count = (name, fallback) => {
-      const n = parseInt(attr(name), 10);
-      return Number.isFinite(n) && n >= 0 ? n : fallback;
+    // Shared pens (sync), used here in the page only.
+    const limit = parseInt(attr('sync-limit'), 10);
+    const delay = parseFloat(attr('respawn-delay'));
+    return {
+      vars, position, el,
+      syncLimit: Number.isFinite(limit) && limit >= 0 ? limit : 10,
+      respawnDelay: Number.isFinite(delay) && delay >= 0 ? delay : 3,
     };
-    const limits = { total: count('sync-limit', 10), perPlayer: count('sync-per-player', 2) };
-    return { vars, position, el, limits };
   };
 
   const send = async (key) => {
@@ -171,78 +175,114 @@
     }
   };
 
-  // ---- Sync: every player still takes a pen of their own from the spot, and everyone sees it.
-  // The pen waiting at the spot gets a network id (penFlightReserve); once taken it's listed in your user state
-  // (penFlightTaken), and every other player's page spawns a copy of it named "key~id" (a mirror), which follows your pen. When your pen goes away
-  // (penFlightGone) or you leave, the copies go too.
-  const mine = new Map();      // id -> key, your shared pens
-  const shared = new Map();    // another player's uid -> their "key~id" entries
-  const mirrors = new Map();   // "key~id" -> { obj } for the copies of other players' pens
-  const safe = (text) => String(text || '').replace(/[^A-Za-z0-9_-]/g, '');
+  // ---- Sync: the pens at each spot are numbered, and pen n of spot `key` is spawned under "key~key-sn" on every
+  // page, so its graph gives it network id "key-sn", the same for everyone. Each player's user state says which
+  // shared pen they have, and every page works out the same thing from it: the pens that are out (moved by whoever
+  // has them), and one waiting at the spot, the lowest number not out. Once sync-limit are out, the one waiting is a
+  // local pen instead, "key~_n" (a handle for this page; only you see it).
+  const ME = '(me)';
+  const taken = new Map();   // player uid (ME for you) -> { key, n }: the shared pen they have
+  const locals = new Map();  // handle -> record: your local pens that have been taken from their spot
+  let serial = 0;
+  const idFor = (key, n) => `${key}-s${n}`;
 
   const publish = () => {
-    const list = Array.from(mine, ([id, key]) => `${key}~${id}`).join(',');
-    BS.Scene.GetInstance().SetUserProps({ [PENS_PROP]: list });
+    const m = taken.get(ME);
+    BS.Scene.GetInstance().SetUserProps({ [PEN_PROP]: m ? `${m.key}:${m.n}` : '' });
+  };
+  const readEntry = (value) => {
+    const m = /^([A-Za-z0-9_-]+):(\d+)$/.exec(String(value || '').trim());
+    return m ? { key: m[1], n: Number(m[2]) } : null;
   };
 
-  // The pen waiting at a spot asks for its network id before anyone takes it (switching sharing on while it's in
-  // your hand froze it there). Having an id doesn't share it yet: nobody else makes a copy of it until it's taken.
-  window.penFlightReserve = (key) => {
-    key = String(key);
-    const scene = BS.Scene.GetInstance();
-    const uid = safe(scene.localUser && scene.localUser.uid) || 'me';
-    const id = `${key}-${uid}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-    scene.SendToVisualScripting(OWN_ID, `${key}|${id}`)
-      .catch((e) => console.warn(`${LOG}: giving pen ${id} an id failed`, e));
-    return true;
+  // A pen spawned for a spot: kept as a record, so one that's dropped while it's still loading goes too.
+  const spawnRecord = (place, id, n) => {
+    const rec = { n, id, obj: null, gone: false };
+    spawnPen(place.el, `${place.key}~${id}`, place.position, n > 0).then((obj) => {
+      if (rec.gone && obj) obj.Destroy();
+      else rec.obj = obj;
+    });
+    return rec;
+  };
+  const drop = (rec) => {
+    if (rec.gone) return;
+    rec.gone = true;
+    if (rec.obj) Promise.resolve().then(() => rec.obj.Destroy()).catch(() => {});
   };
 
-  // The pen with id `id` was taken from spot `key`: list it, so everyone else sees it. Past a limit it isn't
-  // listed, so nobody else sees it: it stays your own, as with sync off.
+  const refresh = () => {
+    for (const place of placements.values()) {
+      if (!place.vars.Sync) continue;
+      const key = place.key;
+      place.out = place.out || new Map(); // n -> record
+      const out = new Set();
+      for (const entry of taken.values()) if (entry.key === key) out.add(entry.n);
+      // Gone: no one has it any more.
+      for (const [n, rec] of place.out) {
+        if (!out.has(n)) { drop(rec); place.out.delete(n); }
+      }
+      // Out: the one waiting here if it's that one, or spawned (it moves to wherever whoever has it takes it).
+      for (const n of out) {
+        if (place.out.has(n)) continue;
+        if (place.waiting && place.waiting.n === n) {
+          place.out.set(n, place.waiting);
+          place.waiting = null;
+          // The next one waits a moment, so it isn't in the way while you get going.
+          place.nextAt = Date.now() + place.respawnDelay * 1000;
+        } else place.out.set(n, spawnRecord(place, idFor(key, n), n));
+      }
+      // Waiting at the spot: shared while there's room, local (n 0) once sync-limit are out, swapped as the room
+      // comes and goes.
+      const room = taken.size < place.syncLimit;
+      if (place.waiting && (place.waiting.n > 0) !== room) { drop(place.waiting); place.waiting = null; }
+      const wait = (place.nextAt || 0) - Date.now();
+      if (!place.waiting && wait > 0) {
+        if (!place.timer) place.timer = setTimeout(() => { place.timer = null; refresh(); }, wait + 20);
+      } else if (!place.waiting) {
+        let n = 0;
+        if (room) for (n = 1; out.has(n); n++);
+        place.waiting = spawnRecord(place, n ? idFor(key, n) : `_${++serial}`, n);
+      }
+    }
+  };
+
+  // You took pen `id` from spot `key`. A shared one is yours (one each, so it replaces your other one) and every
+  // page puts a new one at the spot; a local one is kept here until it goes, and a new one goes at the spot.
   window.penFlightTaken = (key, id) => {
     key = String(key);
     id = String(id || '');
-    if (!id) return false;
     const place = placements.get(key);
-    const limits = place ? place.limits : { total: 10, perPlayer: 2 };
-    let total = mine.size;
-    for (const list of shared.values()) total += list.length;
-    if (mine.size >= limits.perPlayer || total >= limits.total) {
-      console.log(`${LOG}: not sharing this pen (${mine.size} of ${limits.perPlayer} yours, ${total} of ${limits.total} in the space)`);
-      return false;
+    if (id.startsWith('_')) {
+      if (place && place.waiting && place.waiting.id === id) {
+        locals.set(id, place.waiting);
+        place.waiting = null;
+        place.nextAt = Date.now() + place.respawnDelay * 1000;
+      }
+    } else {
+      const n = id.startsWith(`${key}-s`) ? Number(id.slice(key.length + 2)) : NaN;
+      if (!Number.isInteger(n) || n < 1) return false;
+      taken.set(ME, { key, n });
+      publish();
     }
-    mine.set(id, key);
-    publish();
+    // One each: your local pens go (a let-go one goes anyway, see pen-flight-drop).
+    for (const [handle, rec] of locals) if (handle !== id) { drop(rec); locals.delete(handle); }
+    if (id.startsWith('_') && taken.has(ME)) { taken.delete(ME); publish(); }
+    refresh();
     return true;
   };
 
+  // You're done with pen `id`: a shared one goes away for everyone, a local one here.
   window.penFlightGone = (id) => {
-    if (mine.delete(String(id))) publish();
+    id = String(id || '');
+    const rec = locals.get(id);
+    if (rec) { drop(rec); locals.delete(id); }
+    const m = taken.get(ME);
+    if (m && idFor(m.key, m.n) === id) {
+      taken.delete(ME);
+      publish();
+      refresh();
+    }
     return true;
-  };
-
-  const syncMirrors = () => {
-    const wanted = new Set();
-    for (const list of shared.values()) for (const entry of list) wanted.add(entry);
-    for (const [entry, mirror] of mirrors) {
-      if (wanted.has(entry)) continue;
-      mirrors.delete(entry);
-      if (mirror.obj) mirror.obj.Destroy();
-      mirror.gone = true;
-    }
-    for (const entry of wanted) {
-      if (mirrors.has(entry)) continue;
-      const key = entry.split('~')[0];
-      const place = placements.get(key);
-      // Not a spot here (yet): tried again once the spots have started.
-      if (!place || !place.vars.Sync) continue;
-      const mirror = { obj: null, gone: false };
-      mirrors.set(entry, mirror);
-      spawnPen(place.el, entry, place.position, true).then((obj) => {
-        if (mirror.gone && obj) obj.Destroy();
-        else mirror.obj = obj;
-      });
-    }
   };
 
   const start = async (el) => {
@@ -254,10 +294,10 @@
     const settings = readSettings(el);
     for (const { n, position } of penSpots(el, settings.position)) {
       const key = `${base}-${n}`;
-      placements.set(key, { ...settings, position });
-      await spawnPen(el, key, position, settings.vars.Sync);
+      placements.set(key, { ...settings, key, position });
+      if (!settings.vars.Sync) await spawnPen(el, key, position, false);
     }
-    syncMirrors();
+    refresh();
   };
 
   const scan = () => document.querySelectorAll(`bs-snippet[name="${SNIPPET_NAME}"]`).forEach(start);
@@ -294,17 +334,26 @@
       if (!held.delete(key)) return;
       sendKeys();
     });
+    // Other players' shared pens: the ones already out when you arrive, and as they change.
+    for (const user of Object.values(scene.users || {})) {
+      if (user && !user.isLocal && user.props) {
+        const entry = readEntry(user.props[PEN_PROP]);
+        if (entry) taken.set(user.uid, entry);
+      }
+    }
     scene.On('user-state-changed', (e) => {
       const user = e.detail && e.detail.user;
       if (!user || user.isLocal) return;
       for (const change of e.detail.changes || []) {
-        if (change.key !== PENS_PROP) continue;
-        shared.set(user.uid, String(change.newValue || '').split(',').filter((entry) => entry.includes('~')));
-        syncMirrors();
+        if (change.key !== PEN_PROP) continue;
+        const entry = readEntry(change.newValue);
+        if (entry) taken.set(user.uid, entry);
+        else taken.delete(user.uid);
+        refresh();
       }
     });
     scene.On('user-left', (e) => {
-      if (e.detail && shared.delete(e.detail.uid)) syncMirrors();
+      if (e.detail && taken.delete(e.detail.uid)) refresh();
     });
     scan();
     // Placements added later, e.g. with document.createElement('bs-snippet').
